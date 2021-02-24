@@ -64,6 +64,8 @@
 #endif
 
 #include "hip2cuda.h"
+#include "hipblas2cublas.h"
+#include "hiprand2curand.h"
 
 #include <algorithm>
 #include <cassert>
