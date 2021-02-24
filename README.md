@@ -18,21 +18,27 @@
 
 ## Installing
 
-* `./install.sh`
-
-Alternatively,
-
 * `make rocm` to build with HIP (ROCm target),
 * `make hip_cuda` to build with HIP (CUDA target),
 * `make cuda` to build with CUDA (HIP not required).
 
-## Running
+## Running DGEMM
 
-* `./run_16GB.sh` to run using a GPU with 16 GB of memory.
-* `./run_32GB.sh` to run using a GPU with 32 GB of memory.
-* `./run_64GB.sh` to run using a GPU with 64 GB of memory.
+* 16 GB devices (Radeon VII): `./gemm D NT DDD 8640 8640 8640 8640 8640 8640 9 300`
 
-Alternatively,
+* 32 GB devices (MI60, MI100): `./gemm D NT DDD 8640 8640 8640 8640 8640 8640 18 300`
+
+* 64 GB devices (one MI200 GCD): `./gemm D NT DDD 8640 8640 8640 8640 8640 8640 36 300`
+
+## Running SGEMM
+
+* 16 GB devices (Radeon VII): `./gemm S NT DDD 8640 8640 8640 8640 8640 8640 18 300`
+
+* 32 GB devices (MI60, MI100): `./gemm S NT DDD 8640 8640 8640 8640 8640 8640 36 300`
+
+* 64 GB devices (one MI200 GCD): `./gemm S NT DDD 8640 8640 8640 8640 8640 8640 72 300`
+
+## Command-Line Details
 
 ```
 ./gemm <S|C|D|Z|I>        precision
@@ -46,8 +52,6 @@ Alternatively,
        [batched strided]  call the strided batched routine
        [testing]          perform a basic sanity check
 ```
-
-## Details
 
 * benchmarks `hipblas?gemm[Batched|StridedBatched]`
 * allocates `BATCH_SIZE` number of matrices A, B, and C
