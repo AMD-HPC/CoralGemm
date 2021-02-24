@@ -63,68 +63,7 @@
     #include <curand.h>
 #endif
 
-
-
-#if defined(__NVCC__) && !defined(__HIP_PLATFORM__)
-    #define hipSuccess                   cudaSuccess
-    #define hipStream_t                  cudaStream_t
-    #define hipStreamCreate              cudaStreamCreate
-    #define hipStreamDestroy             cudaStreamDestroy
-    #define hipGetDeviceCount            cudaGetDeviceCount
-    #define hipSetDevice                 cudaSetDevice
-    #define hipDeviceSynchronize         cudaDeviceSynchronize
-    #define hipHostMalloc                cudaMallocHost
-    #define hipMalloc                    cudaMalloc
-    #define hipFree                      cudaFree
-    #define hipMemcpy                    cudaMemcpy
-    #define hipMemcpyHostToDevice        cudaMemcpyHostToDevice
-    #define hipEvent_t                   cudaEvent_t
-    #define hipEventCreate               cudaEventCreate
-    #define hipEventDestroy              cudaEventDestroy
-    #define hipEventRecord               cudaEventRecord
-    #define hipEventSynchronize          cudaEventSynchronize
-    #define hipEventElapsedTime          cudaEventElapsedTime
-
-    #define HIPRAND_RNG_PSEUDO_DEFAULT   CURAND_RNG_PSEUDO_DEFAULT
-    #define HIPRAND_STATUS_SUCCESS       CURAND_STATUS_SUCCESS
-    #define hiprandGenerator_t           curandGenerator_t
-    #define hiprandCreateGenerator       curandCreateGenerator
-    #define hiprandDestroyGenerator      curandDestroyGenerator
-    #define hiprandSetStream             curandSetStream
-    #define hiprandGenerate              curandGenerate
-    #define hiprandGenerateUniform       curandGenerateUniform
-    #define hiprandGenerateUniformDouble curandGenerateUniformDouble
-
-    #define HIPBLAS_GEMM_DEFAULT         CUBLAS_GEMM_DEFAULT
-    #define HIPBLAS_OP_N                 CUBLAS_OP_N
-    #define HIPBLAS_OP_T                 CUBLAS_OP_T
-    #define HIPBLAS_OP_C                 CUBLAS_OP_C
-    #define HIPBLAS_R_32I                CUDA_R_32I
-    #define HIPBLAS_R_8I                 CUDA_R_8I
-    #define HIPBLAS_STATUS_SUCCESS       CUBLAS_STATUS_SUCCESS
-    #define hipblasHandle_t              cublasHandle_t
-    #define hipblasOperation_t           cublasOperation_t
-    #define hipblasComplex               cuComplex
-    #define hipblasDoubleComplex         cuDoubleComplex
-    #define hipblasCreate                cublasCreate
-    #define hipblasDestroy               cublasDestroy
-    #define hipblasSetStream             cublasSetStream
-    #define hipblasGemmEx                cublasGemmEx
-    #define hipblasGemmBatchedEx         cublasGemmBatchedEx
-    #define hipblasGemmStridedBatchedEx  cublasGemmStridedBatchedEx
-    #define hipblasSgemm                 cublasSgemm
-    #define hipblasDgemm                 cublasDgemm
-    #define hipblasCgemm                 cublasCgemm
-    #define hipblasZgemm                 cublasZgemm
-    #define hipblasSgemmBatched          cublasSgemmBatched
-    #define hipblasDgemmBatched          cublasDgemmBatched
-    #define hipblasCgemmBatched          cublasCgemmBatched
-    #define hipblasZgemmBatched          cublasZgemmBatched
-    #define hipblasSgemmStridedBatched   cublasSgemmStridedBatched
-    #define hipblasDgemmStridedBatched   cublasDgemmStridedBatched
-    #define hipblasCgemmStridedBatched   cublasCgemmStridedBatched
-    #define hipblasZgemmStridedBatched   cublasZgemmStridedBatched
-#endif
+#include "hip2cuda.h"
 
 #include <algorithm>
 #include <cassert>
@@ -135,9 +74,7 @@
 #include <random>
 #include <vector>
 
-#define CALL_HIP(call) assert(call == hipSuccess)
-#define CALL_HIPRAND(call) assert(call == HIPRAND_STATUS_SUCCESS)
-#define CALL_HIPBLAS(call) assert(call == HIPBLAS_STATUS_SUCCESS)
+#include "Exception.h"
 
 //------------------------------------------------------------------------------
 // \brief Sets all entries to the given value.
@@ -190,25 +127,25 @@ void matrix_assert(int m, int n, T* A, int lda, T val)
 void hiprandGenUni(
     hiprandGenerator_t generator, float* A, std::size_t len)
 {
-    CALL_HIPRAND(hiprandGenerateUniform(generator, A, len));
+    HIPRAND_CALL(hiprandGenerateUniform(generator, A, len));
 }
 
 void hiprandGenUni(
     hiprandGenerator_t generator, double* A, std::size_t len)
 {
-    CALL_HIPRAND(hiprandGenerateUniformDouble(generator, A, len));
+    HIPRAND_CALL(hiprandGenerateUniformDouble(generator, A, len));
 }
 
 void hiprandGenUni(
     hiprandGenerator_t generator, std::complex<float>* A, std::size_t len)
 {
-    CALL_HIPRAND(hiprandGenerateUniform(generator, (float*)A, len*2));
+    HIPRAND_CALL(hiprandGenerateUniform(generator, (float*)A, len*2));
 }
 
 void hiprandGenUni(
     hiprandGenerator_t generator, std::complex<double>* A, std::size_t len)
 {
-    CALL_HIPRAND(hiprandGenerateUniformDouble(generator, (double*)A, len*2));
+    HIPRAND_CALL(hiprandGenerateUniformDouble(generator, (double*)A, len*2));
 }
 
 void hiprandGenUni(
@@ -216,16 +153,16 @@ void hiprandGenUni(
 {
 #if defined(__NVCC__) && !defined(__HIP_PLATFORM__)
     assert(len%4 == 0);
-    CALL_HIPRAND(hiprandGenerate(generator, (unsigned int*)A, len/4));
+    HIPRAND_CALL(hiprandGenerate(generator, (unsigned int*)A, len/4));
 #else
-    CALL_HIPRAND(hiprandGenerateChar(generator, (unsigned char*)A, len));
+    HIPRAND_CALL(hiprandGenerateChar(generator, (unsigned char*)A, len));
 #endif
 }
 
 void hiprandGenUni(
     hiprandGenerator_t generator, int32_t* A, std::size_t len)
 {
-    CALL_HIPRAND(hiprandGenerate(generator, (unsigned int*)A, len));
+    HIPRAND_CALL(hiprandGenerate(generator, (unsigned int*)A, len));
 }
 
 //------------------------------------------------------------------------------
@@ -236,7 +173,7 @@ void hipblasGemm(hipblasHandle_t handle,
                                float* B, int ldb,
                  float* beta,  float* C, int ldc)
 {
-    CALL_HIPBLAS(hipblasSgemm(handle,
+    HIPBLAS_CALL(hipblasSgemm(handle,
                               opA, opB,
                               m, n, k,
                               alpha, A, lda,
@@ -251,7 +188,7 @@ void hipblasGemm(hipblasHandle_t handle,
                                 double* B, int ldb,
                  double* beta,  double* C, int ldc)
 {
-    CALL_HIPBLAS(hipblasDgemm(handle,
+    HIPBLAS_CALL(hipblasDgemm(handle,
                                opA, opB,
                                m, n, k,
                                alpha, A, lda,
@@ -266,7 +203,7 @@ void hipblasGemm(hipblasHandle_t handle,
                                              std::complex<float>* B, int ldb,
                  std::complex<float>* beta,  std::complex<float>* C, int ldc)
 {
-    CALL_HIPBLAS(
+    HIPBLAS_CALL(
         hipblasCgemm(
             handle,
             opA, opB,
@@ -283,7 +220,7 @@ void hipblasGemm(hipblasHandle_t handle,
                                               std::complex<double>* B, int ldb,
                  std::complex<double>* beta,  std::complex<double>* C, int ldc)
 {
-    CALL_HIPBLAS(
+    HIPBLAS_CALL(
         hipblasZgemm(
             handle,
             opA, opB,
@@ -300,7 +237,7 @@ void hipblasGemm(hipblasHandle_t handle,
                                  int8_t* B, int ldb,
                  int32_t* beta, int32_t* C, int ldc)
 {
-    CALL_HIPBLAS(hipblasGemmEx(handle,
+    HIPBLAS_CALL(hipblasGemmEx(handle,
                                opA, opB,
                                m, n, k,
                                alpha, A, HIPBLAS_R_8I,  lda,
@@ -319,7 +256,7 @@ void hipblasGemmBatched(hipblasHandle_t handle,
                         float* beta,  float** C, int ldc,
                         int batch_size)
 {
-    CALL_HIPBLAS(hipblasSgemmBatched(handle,
+    HIPBLAS_CALL(hipblasSgemmBatched(handle,
                                      opA, opB,
                                      m, n, k,
                                      alpha, A, lda,
@@ -336,7 +273,7 @@ void hipblasGemmBatched(hipblasHandle_t handle,
                         double* beta,  double** C, int ldc,
                         int batch_size)
 {
-    CALL_HIPBLAS(hipblasDgemmBatched(handle,
+    HIPBLAS_CALL(hipblasDgemmBatched(handle,
                                      opA, opB,
                                      m, n, k,
                                      alpha, A, lda,
@@ -354,7 +291,7 @@ void hipblasGemmBatched(
     std::complex<float>* beta,  std::complex<float>** C, int ldc,
     int batch_size)
 {
-    CALL_HIPBLAS(
+    HIPBLAS_CALL(
         hipblasCgemmBatched(
             handle,
             opA, opB,
@@ -374,7 +311,7 @@ void hipblasGemmBatched(
     std::complex<double>* beta,  std::complex<double>** C, int ldc,
     int batch_size)
 {
-    CALL_HIPBLAS(
+    HIPBLAS_CALL(
         hipblasZgemmBatched(
             handle,
             opA, opB,
@@ -393,7 +330,7 @@ void hipblasGemmBatched(hipblasHandle_t handle,
                         int32_t* beta, int32_t** C, int ldc,
                         int batch_size)
 {
-    CALL_HIPBLAS(
+    HIPBLAS_CALL(
         hipblasGemmBatchedEx(handle,
                              opA, opB,
                              m, n, k,
@@ -415,7 +352,7 @@ void hipblasGemmStridedBatched(
     float* beta,  float* C, int ldc, std::size_t strideC,
     int batch_size)
 {
-    CALL_HIPBLAS(hipblasSgemmStridedBatched(handle,
+    HIPBLAS_CALL(hipblasSgemmStridedBatched(handle,
                                             opA, opB,
                                             m, n, k,
                                             alpha, A, lda, strideA,
@@ -433,7 +370,7 @@ void hipblasGemmStridedBatched(
     double* beta,  double* C, int ldc, std::size_t strideC,
     int batch_size)
 {
-    CALL_HIPBLAS(hipblasDgemmStridedBatched(handle,
+    HIPBLAS_CALL(hipblasDgemmStridedBatched(handle,
                                             opA, opB,
                                             m, n, k,
                                             alpha, A, lda, strideA,
@@ -453,7 +390,7 @@ void hipblasGemmStridedBatched(
     std::complex<float>* C, int ldc, std::size_t strideC,
     int batch_size)
 {
-    CALL_HIPBLAS(
+    HIPBLAS_CALL(
         hipblasCgemmStridedBatched(
             handle,
             opA, opB,
@@ -475,7 +412,7 @@ void hipblasGemmStridedBatched(
     std::complex<double>* C, int ldc, std::size_t strideC,
     int batch_size)
 {
-    CALL_HIPBLAS(
+    HIPBLAS_CALL(
         hipblasZgemmStridedBatched(
             handle,
             opA, opB,
@@ -497,7 +434,7 @@ void hipblasGemmStridedBatched(
     int32_t* beta, int32_t* C, int ldc, std::size_t strideC,
     int batch_size)
 {
-    CALL_HIPBLAS(
+    HIPBLAS_CALL(
         hipblasGemmStridedBatchedEx(handle,
                                     opA, opB,
                                     m, n, k,
@@ -519,7 +456,7 @@ void time_gemm(hipblasOperation_t opA, hipblasOperation_t opB,
                bool batched, bool strided, bool testing)
 {
     int num_devices;
-    CALL_HIP(hipGetDeviceCount(&num_devices));
+    HIP_CALL(hipGetDeviceCount(&num_devices));
     assert(num_devices > 0);
 
     //---------------------------------
@@ -531,15 +468,15 @@ void time_gemm(hipblasOperation_t opA, hipblasOperation_t opB,
     std::vector<hipEvent_t> stop(num_devices);
     std::vector<std::vector<float>> elapsed(num_devices);
     for (int device = 0; device < num_devices; ++device) {
-        CALL_HIP(hipSetDevice(device));
-        CALL_HIP(hipStreamCreate(&stream[device]));
-        CALL_HIPBLAS(hipblasCreate(&handle[device]));
-        CALL_HIPBLAS(hipblasSetStream(handle[device], stream[device]));
-        CALL_HIPRAND(hiprandCreateGenerator(&generator[device],
+        HIP_CALL(hipSetDevice(device));
+        HIP_CALL(hipStreamCreate(&stream[device]));
+        HIPBLAS_CALL(hipblasCreate(&handle[device]));
+        HIPBLAS_CALL(hipblasSetStream(handle[device], stream[device]));
+        HIPRAND_CALL(hiprandCreateGenerator(&generator[device],
                                             HIPRAND_RNG_PSEUDO_DEFAULT));
-        CALL_HIPRAND(hiprandSetStream(generator[device], stream[device]));
-        CALL_HIP(hipEventCreate(&start[device]));
-        CALL_HIP(hipEventCreate(&stop[device]));
+        HIPRAND_CALL(hiprandSetStream(generator[device], stream[device]));
+        HIP_CALL(hipEventCreate(&start[device]));
+        HIP_CALL(hipEventCreate(&stop[device]));
         elapsed[device].resize(batch_size);
     }
 
@@ -556,21 +493,31 @@ void time_gemm(hipblasOperation_t opA, hipblasOperation_t opB,
     std::size_t sizeB = sizeof(Tb)*lenB;
     std::size_t sizeC = sizeof(Tc)*lenC;
     for (int device = 0; device < num_devices; ++device) {
-        CALL_HIP(hipSetDevice(device));
-        if (hostA) CALL_HIP(hipHostMalloc(&d_A[device], sizeA*batch_size));
-        else       CALL_HIP(hipMalloc(    &d_A[device], sizeA*batch_size));
-
-        if (hostB) CALL_HIP(hipHostMalloc(&d_B[device], sizeB*batch_size));
-        else       CALL_HIP(hipMalloc(    &d_B[device], sizeB*batch_size));
-
-        if (hostC) CALL_HIP(hipHostMalloc(&d_C[device], sizeC*batch_size));
-        else       CALL_HIP(hipMalloc(    &d_C[device], sizeC*batch_size));
+        HIP_CALL(hipSetDevice(device));
+        if (hostA) {
+            HIP_CALL(hipHostMalloc(&d_A[device], sizeA*batch_size));
+        }
+        else {
+            HIP_CALL(hipMalloc(    &d_A[device], sizeA*batch_size));
+        }
+        if (hostB) {
+            HIP_CALL(hipHostMalloc(&d_B[device], sizeB*batch_size));
+        }
+        else {
+            HIP_CALL(hipMalloc(    &d_B[device], sizeB*batch_size));
+        }
+        if (hostC) {
+            HIP_CALL(hipHostMalloc(&d_C[device], sizeC*batch_size));
+        }
+        else {
+            HIP_CALL(hipMalloc(    &d_C[device], sizeC*batch_size));
+        }
     }
 
     //------------------------
     // Initialize data arrays.
     for (int device = 0; device < num_devices; ++device) {
-        CALL_HIP(hipSetDevice(device));
+        HIP_CALL(hipSetDevice(device));
         if (testing) {
             matrix_set(opA == HIPBLAS_OP_N ? m : k,
                        opA == HIPBLAS_OP_N ? k : m,
@@ -596,7 +543,7 @@ void time_gemm(hipblasOperation_t opA, hipblasOperation_t opB,
     std::vector<Tb**> d_B_array(num_devices);
     std::vector<Tc**> d_C_array(num_devices);
     for (int device = 0; device < num_devices; ++device) {
-        CALL_HIP(hipSetDevice(device));
+        HIP_CALL(hipSetDevice(device));
         if (batched) {
             h_A_array[device] = (Ta**)malloc(sizeof(Ta*)*batch_size);
             h_B_array[device] = (Tb**)malloc(sizeof(Tb*)*batch_size);
@@ -609,17 +556,17 @@ void time_gemm(hipblasOperation_t opA, hipblasOperation_t opB,
                 h_B_array[device][i] = d_B[device] + lenB*i;
                 h_C_array[device][i] = d_C[device] + lenC*i;
             }
-            CALL_HIP(hipMalloc(&d_A_array[device], sizeof(Ta*)*batch_size));
-            CALL_HIP(hipMalloc(&d_B_array[device], sizeof(Tb*)*batch_size));
-            CALL_HIP(hipMalloc(&d_C_array[device], sizeof(Tc*)*batch_size));
+            HIP_CALL(hipMalloc(&d_A_array[device], sizeof(Ta*)*batch_size));
+            HIP_CALL(hipMalloc(&d_B_array[device], sizeof(Tb*)*batch_size));
+            HIP_CALL(hipMalloc(&d_C_array[device], sizeof(Tc*)*batch_size));
 
-            CALL_HIP(hipMemcpy(d_A_array[device], h_A_array[device],
+            HIP_CALL(hipMemcpy(d_A_array[device], h_A_array[device],
                                sizeof(Ta*)*batch_size, hipMemcpyHostToDevice));
 
-            CALL_HIP(hipMemcpy(d_B_array[device], h_B_array[device],
+            HIP_CALL(hipMemcpy(d_B_array[device], h_B_array[device],
                                sizeof(Tb*)*batch_size, hipMemcpyHostToDevice));
 
-            CALL_HIP(hipMemcpy(d_C_array[device], h_C_array[device],
+            HIP_CALL(hipMemcpy(d_C_array[device], h_C_array[device],
                                sizeof(Tc*)*batch_size, hipMemcpyHostToDevice));
         }
     }
@@ -653,8 +600,8 @@ void time_gemm(hipblasOperation_t opA, hipblasOperation_t opB,
             //-------------
             // batched call
             for (int device = 0; device < num_devices; ++device) {
-                CALL_HIP(hipSetDevice(device));
-                CALL_HIP(hipEventRecord(start[device], stream[device]));
+                HIP_CALL(hipSetDevice(device));
+                HIP_CALL(hipEventRecord(start[device], stream[device]));
                 if (!strided) {
                     // pointer arrays
                     hipblasGemmBatched(handle[device],
@@ -675,12 +622,12 @@ void time_gemm(hipblasOperation_t opA, hipblasOperation_t opB,
                                               &beta,  d_C[device], ldc, lenC,
                                               batch_size);
                 }
-                CALL_HIP(hipEventRecord(stop[device], stream[device]));
+                HIP_CALL(hipEventRecord(stop[device], stream[device]));
             }
             for (int device = 0; device < num_devices; ++device) {
-                CALL_HIP(hipSetDevice(device));
-                CALL_HIP(hipEventSynchronize(stop[device]));
-                CALL_HIP(hipEventElapsedTime(&elapsed[device][0],
+                HIP_CALL(hipSetDevice(device));
+                HIP_CALL(hipEventSynchronize(stop[device]));
+                HIP_CALL(hipEventElapsedTime(&elapsed[device][0],
                                              start[device],
                                              stop[device]));
             }
@@ -698,26 +645,26 @@ void time_gemm(hipblasOperation_t opA, hipblasOperation_t opB,
             // standard calls in a loop
             for (int i = 0; i < batch_size; ++i) {
                 for (int device = 0; device < num_devices; ++device) {
-                    CALL_HIP(hipSetDevice(device));
-                    CALL_HIP(hipEventRecord(start[device], stream[device]));
+                    HIP_CALL(hipSetDevice(device));
+                    HIP_CALL(hipEventRecord(start[device], stream[device]));
                     hipblasGemm(handle[device],
                                 opA, opB,
                                 m, n, k,
                                 &alpha, d_A[device] + lenA*i, lda,
                                         d_B[device] + lenB*i, ldb,
                                 &beta,  d_C[device] + lenC*i, ldc);
-                    CALL_HIP(hipEventRecord(stop[device], stream[device]));
+                    HIP_CALL(hipEventRecord(stop[device], stream[device]));
                 }
                 for (int device = 0; device < num_devices; ++device) {
-                    CALL_HIP(hipSetDevice(device));
-                    CALL_HIP(hipEventSynchronize(stop[device]));
-                    CALL_HIP(hipEventElapsedTime(&elapsed[device][i],
+                    HIP_CALL(hipSetDevice(device));
+                    HIP_CALL(hipEventSynchronize(stop[device]));
+                    HIP_CALL(hipEventElapsedTime(&elapsed[device][i],
                                                  start[device],
                                                  stop[device]));
                 }
             }
             for (int device = 0; device < num_devices; ++device) {
-                CALL_HIP(hipSetDevice(device));
+                HIP_CALL(hipSetDevice(device));
                 if (count == 0 && testing)
                     matrix_assert(m, n, d_C[device], ldc, static_cast<Tc>(k+1));
 
@@ -743,14 +690,14 @@ void time_gemm(hipblasOperation_t opA, hipblasOperation_t opB,
     //--------
     // cleanup
     for (int device = 0; device < num_devices; ++device) {
-        CALL_HIP(hipEventDestroy(start[device]));
-        CALL_HIP(hipEventDestroy(stop[device]));
-        CALL_HIPRAND(hiprandDestroyGenerator(generator[device]));
-        CALL_HIPBLAS(hipblasDestroy(handle[device]));
-        CALL_HIP(hipStreamDestroy(stream[device]));
-        CALL_HIP(hipFree(d_A[device]));
-        CALL_HIP(hipFree(d_B[device]));
-        CALL_HIP(hipFree(d_C[device]));
+        HIP_CALL(hipEventDestroy(start[device]));
+        HIP_CALL(hipEventDestroy(stop[device]));
+        HIPRAND_CALL(hiprandDestroyGenerator(generator[device]));
+        HIPBLAS_CALL(hipblasDestroy(handle[device]));
+        HIP_CALL(hipStreamDestroy(stream[device]));
+        HIP_CALL(hipFree(d_A[device]));
+        HIP_CALL(hipFree(d_B[device]));
+        HIP_CALL(hipFree(d_C[device]));
     }
 }
 

@@ -30,11 +30,5 @@ cuda:
 	$(NVCC) $(NV_LIBS) \
 			$(CXXFLAGS) $(NV_FLAGS) $(SRC) -o $(EXE)
 
-run:
-	./gemm D NT DDD 8640 8640 8640 8640 8640 8640 9 300
-
-doc:
-	pandoc README.md -o README.pdf
-
 clean:
-	rm -rf $(EXE) *.pdf
+	rm -rf $(EXE)

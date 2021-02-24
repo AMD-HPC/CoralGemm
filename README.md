@@ -18,6 +18,7 @@
 
 ## Installing
 
+* `cd src`
 * `make rocm` to build with HIP (ROCm target),
 * `make hip_cuda` to build with HIP (CUDA target),
 * `make cuda` to build with CUDA (HIP not required).
