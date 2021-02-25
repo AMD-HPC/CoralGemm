@@ -23,6 +23,13 @@
 * `make hip_cuda` to build with HIP (CUDA target),
 * `make cuda` to build with CUDA (HIP not required).
 
+Make sure to add `gfx90a` to the list of target architectures in the Makefile
+before compiling for MI200, i.e.:
+
+```
+ROC_FLAGS  = --amdgpu-target=gfx906,gfx908,gfx90a
+```
+
 ## Running DGEMM
 
 * 16 GB devices (Radeon VII): `./gemm D NT DDD 8640 8640 8640 8640 8640 8640 9 300`
