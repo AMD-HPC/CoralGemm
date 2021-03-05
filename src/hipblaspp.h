@@ -21,284 +21,456 @@
 namespace hipblas {
 
 //------------------------------------------------------------------------------
+inline
 void gemm(hipblasHandle_t handle,
-          hipblasOperation_t opA, hipblasOperation_t opB,
+          hipblasOperation_t op_a,
+          hipblasOperation_t op_b,
           int m, int n, int k,
-          float* alpha, float* A, int lda,
-                        float* B, int ldb,
-          float* beta,  float* C, int ldc)
+          float const* alpha,
+          float const* A, int lda,
+          float const* B, int ldb,
+          float const* beta,
+          float* C, int ldc)
 {
     HIPBLAS_CALL(hipblasSgemm(handle,
-                              opA, opB,
+                              op_a, op_b,
                               m, n, k,
                               alpha, A, lda,
                                      B, ldb,
                               beta,  C, ldc));
 }
 
+inline
 void gemm(hipblasHandle_t handle,
-          hipblasOperation_t opA, hipblasOperation_t opB,
+          hipblasOperation_t op_a,
+          hipblasOperation_t op_b,
           int m, int n, int k,
-          double* alpha, double* A, int lda,
-                         double* B, int ldb,
-          double* beta,  double* C, int ldc)
+          double const* alpha,
+          double const* A, int lda,
+          double const* B, int ldb,
+          double const* beta,
+          double* C, int ldc)
 {
     HIPBLAS_CALL(hipblasDgemm(handle,
-                              opA, opB,
+                              op_a, op_b,
                               m, n, k,
                               alpha, A, lda,
                                      B, ldb,
                               beta,  C, ldc));
 }
 
+inline
 void gemm(hipblasHandle_t handle,
-          hipblasOperation_t opA, hipblasOperation_t opB,
+          hipblasOperation_t op_a,
+          hipblasOperation_t op_b,
           int m, int n, int k,
-          std::complex<float>* alpha, std::complex<float>* A, int lda,
-                                      std::complex<float>* B, int ldb,
-          std::complex<float>* beta,  std::complex<float>* C, int ldc)
+          std::complex<float> const* alpha,
+          std::complex<float> const* A, int lda,
+          std::complex<float> const* B, int ldb,
+          std::complex<float> const* beta,
+          std::complex<float>* C, int ldc)
 {
-    HIPBLAS_CALL(
-        hipblasCgemm(
-            handle,
-            opA, opB,
-            m, n, k,
-            (hipblasComplex*)alpha, (hipblasComplex*)A, lda,
-                                    (hipblasComplex*)B, ldb,
-            (hipblasComplex*)beta,  (hipblasComplex*)C, ldc));
+    HIPBLAS_CALL(hipblasCgemm(handle,
+                              op_a, op_b,
+                              m, n, k,
+                              (hipblasComplex const*)alpha,
+                              (hipblasComplex const*)A, lda,
+                              (hipblasComplex const*)B, ldb,
+                              (hipblasComplex const*)beta,
+                              (hipblasComplex*)C, ldc));
 }
 
+inline
 void gemm(hipblasHandle_t handle,
-          hipblasOperation_t opA, hipblasOperation_t opB,
+          hipblasOperation_t op_a,
+          hipblasOperation_t op_b,
           int m, int n, int k,
-          std::complex<double>* alpha, std::complex<double>* A, int lda,
-                                       std::complex<double>* B, int ldb,
-          std::complex<double>* beta,  std::complex<double>* C, int ldc)
+          std::complex<double> const* alpha,
+          std::complex<double> const* A, int lda,
+          std::complex<double> const* B, int ldb,
+          std::complex<double> const* beta,
+          std::complex<double>* C, int ldc)
 {
-    HIPBLAS_CALL(
-        hipblasZgemm(
-            handle,
-            opA, opB,
-            m, n, k,
-            (hipblasDoubleComplex*)alpha, (hipblasDoubleComplex*)A, lda,
-                                          (hipblasDoubleComplex*)B, ldb,
-            (hipblasDoubleComplex*)beta,  (hipblasDoubleComplex*)C, ldc));
+    HIPBLAS_CALL(hipblasZgemm(handle,
+                              op_a, op_b,
+                              m, n, k,
+                              (hipblasDoubleComplex const*)alpha,
+                              (hipblasDoubleComplex const*)A, lda,
+                              (hipblasDoubleComplex const*)B, ldb,
+                              (hipblasDoubleComplex const*)beta,
+                              (hipblasDoubleComplex*)C, ldc));
 }
 
-void gemm(hipblasHandle_t handle,
-          hipblasOperation_t opA, hipblasOperation_t opB,
+inline
+void gemm(hipblasDatatype_t type,
+          hipblasHandle_t handle,
+          hipblasOperation_t op_a,
+          hipblasOperation_t op_b,
           int m, int n, int k,
-          int32_t* alpha, int8_t* A, int lda,
-                          int8_t* B, int ldb,
-          int32_t* beta, int32_t* C, int ldc)
+          void const* alpha,
+          void const* A, int lda,
+          void const* B, int ldb,
+          void const* beta,
+          void* C, int ldc)
 {
-    HIPBLAS_CALL(hipblasGemmEx(handle,
-                               opA, opB,
-                               m, n, k,
-                               alpha, A, HIPBLAS_R_8I,  lda,
-                                      B, HIPBLAS_R_8I,  ldb,
-                               beta,  C, HIPBLAS_R_32I, ldc,
-                               HIPBLAS_R_32I,
-                               HIPBLAS_GEMM_DEFAULT));
+    switch (type) {
+        case HIPBLAS_R_32F:
+            gemm(handle,
+                 op_a, op_b,
+                 m, n, k,
+                 (float const*)alpha,
+                 (float const*)A, lda,
+                 (float const*)B, ldb,
+                 (float const*)beta,
+                 (float*)C, ldc);
+            break;
+        case HIPBLAS_R_64F:
+            gemm(handle,
+                 op_a, op_b,
+                 m, n, k,
+                 (double const*)alpha,
+                 (double const*)A, lda,
+                 (double const*)B, ldb,
+                 (double const*)beta,
+                 (double*)C, ldc);
+            break;
+        case HIPBLAS_C_32F:
+            gemm(handle,
+                 op_a, op_b,
+                 m, n, k,
+                 (std::complex<float> const*)alpha,
+                 (std::complex<float> const*)A, lda,
+                 (std::complex<float> const*)B, ldb,
+                 (std::complex<float> const*)beta,
+                 (std::complex<float>*)C, ldc);
+            break;
+        case HIPBLAS_C_64F:
+            gemm(handle,
+                 op_a, op_b,
+                 m, n, k,
+                 (std::complex<double> const*)alpha,
+                 (std::complex<double> const*)A, lda,
+                 (std::complex<double> const*)B, ldb,
+                 (std::complex<double> const*)beta,
+                 (std::complex<double>*)C, ldc);
+            break;
+        default:
+            ERROR("Unsupported data type.");
+    }
 }
 
 //------------------------------------------------------------------------------
+inline
 void gemmBatched(hipblasHandle_t handle,
-                 hipblasOperation_t opA, hipblasOperation_t opB,
+                 hipblasOperation_t op_a,
+                 hipblasOperation_t op_b,
                  int m, int n, int k,
-                 float* alpha, float** A, int lda,
-                               float** B, int ldb,
-                 float* beta,  float** C, int ldc,
-                 int batch_size)
+                 float const* alpha,
+                 float* const* A, int lda,
+                 float* const* B, int ldb,
+                 float const* beta,
+                 float** C, int ldc,
+                 int batch_count)
 {
     HIPBLAS_CALL(hipblasSgemmBatched(handle,
-                                     opA, opB,
+                                     op_a, op_b,
                                      m, n, k,
                                      alpha, A, lda,
                                             B, ldb,
                                      beta,  C, ldc,
-                                     batch_size));
+                                     batch_count));
 }
 
+inline
 void gemmBatched(hipblasHandle_t handle,
-                 hipblasOperation_t opA, hipblasOperation_t opB,
+                 hipblasOperation_t op_a,
+                 hipblasOperation_t op_b,
                  int m, int n, int k,
-                 double* alpha, double** A, int lda,
-                                double** B, int ldb,
-                 double* beta,  double** C, int ldc,
-                 int batch_size)
+                 double const* alpha,
+                 double* const* A, int lda,
+                 double* const* B, int ldb,
+                 double const* beta,
+                 double** C, int ldc,
+                 int batch_count)
 {
     HIPBLAS_CALL(hipblasDgemmBatched(handle,
-                                     opA, opB,
+                                     op_a, op_b,
                                      m, n, k,
                                      alpha, A, lda,
                                             B, ldb,
                                      beta,  C, ldc,
-                                     batch_size));
+                                     batch_count));
 }
 
-void gemmBatched(
-    hipblasHandle_t handle,
-    hipblasOperation_t opA, hipblasOperation_t opB,
-    int m, int n, int k,
-    std::complex<float>* alpha, std::complex<float>** A, int lda,
-                                std::complex<float>** B, int ldb,
-    std::complex<float>* beta,  std::complex<float>** C, int ldc,
-    int batch_size)
-{
-    HIPBLAS_CALL(
-        hipblasCgemmBatched(
-            handle,
-            opA, opB,
-            m, n, k,
-            (hipblasComplex*)alpha, (hipblasComplex**)A, lda,
-                                    (hipblasComplex**)B, ldb,
-            (hipblasComplex*)beta,  (hipblasComplex**)C, ldc,
-            batch_size));
-}
-
-void gemmBatched(
-    hipblasHandle_t handle,
-    hipblasOperation_t opA, hipblasOperation_t opB,
-    int m, int n, int k,
-    std::complex<double>* alpha, std::complex<double>** A, int lda,
-                                 std::complex<double>** B, int ldb,
-    std::complex<double>* beta,  std::complex<double>** C, int ldc,
-    int batch_size)
-{
-    HIPBLAS_CALL(
-        hipblasZgemmBatched(
-            handle,
-            opA, opB,
-            m, n, k,
-            (hipblasDoubleComplex*)alpha, (hipblasDoubleComplex**)A, lda,
-                                          (hipblasDoubleComplex**)B, ldb,
-            (hipblasDoubleComplex*)beta,  (hipblasDoubleComplex**)C, ldc,
-            batch_size));
-}
-
+inline
 void gemmBatched(hipblasHandle_t handle,
-                 hipblasOperation_t opA, hipblasOperation_t opB,
+                 hipblasOperation_t op_a,
+                 hipblasOperation_t op_b,
                  int m, int n, int k,
-                 int32_t* alpha, int8_t** A, int lda,
-                                 int8_t** B, int ldb,
-                 int32_t* beta, int32_t** C, int ldc,
-                 int batch_size)
+                 std::complex<float> const* alpha,
+                 std::complex<float>* const* A, int lda,
+                 std::complex<float>* const* B, int ldb,
+                 std::complex<float> const* beta,
+                 std::complex<float>** C, int ldc,
+                 int batch_count)
 {
-    HIPBLAS_CALL(
-        hipblasGemmBatchedEx(handle,
-                             opA, opB,
-                             m, n, k,
-                             alpha, (const void**)A, HIPBLAS_R_8I,  lda,
-                                    (const void**)B, HIPBLAS_R_8I,  ldb,
-                             beta,  (      void**)C, HIPBLAS_R_32I, ldc,
-                             batch_size,
-                             HIPBLAS_R_32I,
-                             HIPBLAS_GEMM_DEFAULT));
+    HIPBLAS_CALL(hipblasCgemmBatched(handle,
+                                     op_a, op_b,
+                                     m, n, k,
+                                     (hipblasComplex const*)alpha,
+                                     (hipblasComplex* const*)A, lda,
+                                     (hipblasComplex* const*)B, ldb,
+                                     (hipblasComplex const*)beta,
+                                     (hipblasComplex**)C, ldc,
+                                     batch_count));
+}
+
+inline
+void gemmBatched(hipblasHandle_t handle,
+                 hipblasOperation_t op_a,
+                 hipblasOperation_t op_b,
+                 int m, int n, int k,
+                 std::complex<double> const* alpha,
+                 std::complex<double>* const* A, int lda,
+                 std::complex<double>* const* B, int ldb,
+                 std::complex<double> const* beta,
+                 std::complex<double>** C, int ldc,
+                 int batch_count)
+{
+    HIPBLAS_CALL(hipblasZgemmBatched(handle,
+                                     op_a, op_b,
+                                     m, n, k,
+                                     (hipblasDoubleComplex const*)alpha,
+                                     (hipblasDoubleComplex* const*)A, lda,
+                                     (hipblasDoubleComplex* const*)B, ldb,
+                                     (hipblasDoubleComplex const*)beta,
+                                     (hipblasDoubleComplex**)C, ldc,
+                                     batch_count));
+}
+
+inline
+void gemmBatched(hipblasDatatype_t type,
+                 hipblasHandle_t handle,
+                 hipblasOperation_t op_a,
+                 hipblasOperation_t op_b,
+                 int m, int n, int k,
+                 void const* alpha,
+                 void* const* A, int lda,
+                 void* const* B, int ldb,
+                 void const* beta,
+                 void** C, int ldc,
+                 int batch_count)
+{
+    switch (type) {
+        case HIPBLAS_R_32F:
+            gemmBatched(handle,
+                        op_a, op_b,
+                        m, n, k,
+                        (float const*)alpha,
+                        (float* const*)A, lda,
+                        (float* const*)B, ldb,
+                        (float const*)beta,
+                        (float**)C, ldc,
+                        batch_count);
+            break;
+        case HIPBLAS_R_64F:
+            gemmBatched(handle,
+                        op_a, op_b,
+                        m, n, k,
+                        (double const*)alpha,
+                        (double* const*)A, lda,
+                        (double* const*)B, ldb,
+                        (double const*)beta,
+                        (double**)C, ldc,
+                        batch_count);
+            break;
+        case HIPBLAS_C_32F:
+            gemmBatched(handle,
+                        op_a, op_b,
+                        m, n, k,
+                        (std::complex<float> const*)alpha,
+                        (std::complex<float>* const*)A, lda,
+                        (std::complex<float>* const*)B, ldb,
+                        (std::complex<float> const*)beta,
+                        (std::complex<float>**)C, ldc,
+                        batch_count);
+            break;
+        case HIPBLAS_C_64F:
+            gemmBatched(handle,
+                        op_a, op_b,
+                        m, n, k,
+                        (std::complex<double> const*)alpha,
+                        (std::complex<double>* const*)A, lda,
+                        (std::complex<double>* const*)B, ldb,
+                        (std::complex<double> const*)beta,
+                        (std::complex<double>**)C, ldc,
+                        batch_count);
+            break;
+        default:
+            ERROR("Unsupported data type.");
+    }
 }
 
 //------------------------------------------------------------------------------
+inline
 void gemmStridedBatched(
     hipblasHandle_t handle,
-    hipblasOperation_t opA, hipblasOperation_t opB,
+    hipblasOperation_t op_a,
+    hipblasOperation_t op_b,
     int m, int n, int k,
-    float* alpha, float* A, int lda, std::size_t strideA,
-                  float* B, int ldb, std::size_t strideB,
-    float* beta,  float* C, int ldc, std::size_t strideC,
-    int batch_size)
+    float const* alpha,
+    float const* A, int lda, std::size_t strideA,
+    float const* B, int ldb, std::size_t strideB,
+    float const* beta,
+    float* C, int ldc, std::size_t strideC,
+    int batch_count)
 {
-    HIPBLAS_CALL(hipblasSgemmStridedBatched(handle,
-                                            opA, opB,
-                                            m, n, k,
-                                            alpha, A, lda, strideA,
-                                                   B, ldb, strideB,
-                                            beta,  C, ldc, strideC,
-                                            batch_size));
+    HIPBLAS_CALL(
+        hipblasSgemmStridedBatched(handle,
+                                   op_a, op_b,
+                                   m, n, k,
+                                   alpha, A, lda, strideA,
+                                          B, ldb, strideB,
+                                   beta,  C, ldc, strideC,
+                                   batch_count));
 }
 
+inline
 void gemmStridedBatched(
     hipblasHandle_t handle,
-    hipblasOperation_t opA, hipblasOperation_t opB,
+    hipblasOperation_t op_a,
+    hipblasOperation_t op_b,
     int m, int n, int k,
-    double* alpha, double* A, int lda, std::size_t strideA,
-                   double* B, int ldb, std::size_t strideB,
-    double* beta,  double* C, int ldc, std::size_t strideC,
-    int batch_size)
+    double const* alpha,
+    double const* A, int lda, std::size_t strideA,
+    double const* B, int ldb, std::size_t strideB,
+    double const* beta,
+    double* C, int ldc, std::size_t strideC,
+    int batch_count)
 {
-    HIPBLAS_CALL(hipblasDgemmStridedBatched(handle,
-                                            opA, opB,
-                                            m, n, k,
-                                            alpha, A, lda, strideA,
-                                                   B, ldb, strideB,
-                                            beta,  C, ldc, strideC,
-                                            batch_size));
+    HIPBLAS_CALL(
+        hipblasDgemmStridedBatched(handle,
+                                   op_a, op_b,
+                                   m, n, k,
+                                   alpha, A, lda, strideA,
+                                          B, ldb, strideB,
+                                   beta,  C, ldc, strideC,
+                                   batch_count));
 }
 
+inline
 void gemmStridedBatched(
     hipblasHandle_t handle,
-    hipblasOperation_t opA, hipblasOperation_t opB,
+    hipblasOperation_t op_a,
+    hipblasOperation_t op_b,
     int m, int n, int k,
-    std::complex<float>* alpha,
-    std::complex<float>* A, int lda, std::size_t strideA,
-    std::complex<float>* B, int ldb, std::size_t strideB,
-    std::complex<float>* beta,
+    std::complex<float> const* alpha,
+    std::complex<float> const* A, int lda, std::size_t strideA,
+    std::complex<float> const* B, int ldb, std::size_t strideB,
+    std::complex<float> const* beta,
     std::complex<float>* C, int ldc, std::size_t strideC,
-    int batch_size)
+    int batch_count)
 {
     HIPBLAS_CALL(
         hipblasCgemmStridedBatched(
             handle,
-            opA, opB,
+            op_a, op_b,
             m, n, k,
-            (hipblasComplex*)alpha, (hipblasComplex*)A, lda, strideA,
-                                    (hipblasComplex*)B, ldb, strideB,
-            (hipblasComplex*)beta,  (hipblasComplex*)C, ldc, strideC,
-            batch_size));
+            (hipblasComplex const*)alpha,
+            (hipblasComplex const*)A, lda, strideA,
+            (hipblasComplex const*)B, ldb, strideB,
+            (hipblasComplex const*)beta,
+            (hipblasComplex*)C, ldc, strideC,
+            batch_count));
 }
 
+inline
 void gemmStridedBatched(
     hipblasHandle_t handle,
-    hipblasOperation_t opA, hipblasOperation_t opB,
+    hipblasOperation_t op_a,
+    hipblasOperation_t op_b,
     int m, int n, int k,
-    std::complex<double>* alpha,
-    std::complex<double>* A, int lda, std::size_t strideA,
-    std::complex<double>* B, int ldb, std::size_t strideB,
-    std::complex<double>* beta,
+    std::complex<double> const* alpha,
+    std::complex<double> const* A, int lda, std::size_t strideA,
+    std::complex<double> const* B, int ldb, std::size_t strideB,
+    std::complex<double> const* beta,
     std::complex<double>* C, int ldc, std::size_t strideC,
-    int batch_size)
+    int batch_count)
 {
     HIPBLAS_CALL(
         hipblasZgemmStridedBatched(
             handle,
-            opA, opB,
+            op_a, op_b,
             m, n, k,
-            (hipblasDoubleComplex*)alpha,
-            (hipblasDoubleComplex*)A, lda, strideA,
-            (hipblasDoubleComplex*)B, ldb, strideB,
-            (hipblasDoubleComplex*)beta,
+            (hipblasDoubleComplex const*)alpha,
+            (hipblasDoubleComplex const*)A, lda, strideA,
+            (hipblasDoubleComplex const*)B, ldb, strideB,
+            (hipblasDoubleComplex const*)beta,
             (hipblasDoubleComplex*)C, ldc, strideC,
-            batch_size));
+            batch_count));
 }
-
+ inline
 void gemmStridedBatched(
+    hipblasDatatype_t type,
     hipblasHandle_t handle,
-    hipblasOperation_t opA, hipblasOperation_t opB,
+    hipblasOperation_t op_a,
+    hipblasOperation_t op_b,
     int m, int n, int k,
-    int32_t* alpha, int8_t* A, int lda, std::size_t strideA,
-                    int8_t* B, int ldb, std::size_t strideB,
-    int32_t* beta, int32_t* C, int ldc, std::size_t strideC,
-    int batch_size)
+    void const* alpha,
+    void const* A, int lda, std::size_t strideA,
+    void const* B, int ldb, std::size_t strideB,
+    void const* beta,
+    void* C, int ldc, std::size_t strideC,
+    int batch_count)
 {
-    HIPBLAS_CALL(
-        hipblasGemmStridedBatchedEx(handle,
-                                    opA, opB,
-                                    m, n, k,
-                                    alpha, A, HIPBLAS_R_8I,  lda, strideA,
-                                           B, HIPBLAS_R_8I,  ldb, strideB,
-                                    beta,  C, HIPBLAS_R_32I, ldc, strideC,
-                                    batch_size,
-                                    HIPBLAS_R_32I,
-                                    HIPBLAS_GEMM_DEFAULT));
+    switch (type) {
+        case HIPBLAS_R_32F:
+            gemmStridedBatched(handle,
+                               op_a, op_b,
+                               m, n, k,
+                               (float const*)alpha,
+                               (float const*)A, lda, strideA,
+                               (float const*)B, ldb, strideB,
+                               (float const*)beta,
+                               (float*)C, ldc, strideC,
+                               batch_count);
+            break;
+        case HIPBLAS_R_64F:
+            gemmStridedBatched(handle,
+                               op_a, op_b,
+                               m, n, k,
+                               (double const*)alpha,
+                               (double const*)A, lda, strideA,
+                               (double const*)B, ldb, strideB,
+                               (double const*)beta,
+                               (double*)C, ldc, strideC,
+                               batch_count);
+            break;
+        case HIPBLAS_C_32F:
+            gemmStridedBatched(handle,
+                               op_a, op_b,
+                               m, n, k,
+                               (std::complex<float> const*)alpha,
+                               (std::complex<float> const*)A, lda, strideA,
+                               (std::complex<float> const*)B, ldb, strideB,
+                               (std::complex<float> const*)beta,
+                               (std::complex<float>*)C, ldc, strideC,
+                               batch_count);
+            break;
+        case HIPBLAS_C_64F:
+            gemmStridedBatched(handle,
+                               op_a, op_b,
+                               m, n, k,
+                               (std::complex<double> const*)alpha,
+                               (std::complex<double> const*)A, lda, strideA,
+                               (std::complex<double> const*)B, ldb, strideB,
+                               (std::complex<double> const*)beta,
+                               (std::complex<double>*)C, ldc, strideC,
+                               batch_count);
+            break;
+        default:
+            ERROR("Unsupported data type.");
+    }
 }
 
 } // namespace hipblas

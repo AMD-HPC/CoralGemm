@@ -20,30 +20,35 @@
 /// C++ wrappers for hipRAND routines
 namespace hiprand {
 
+inline
 void generateUniform(
     hiprandGenerator_t generator, float* A, std::size_t len)
 {
     HIPRAND_CALL(hiprandGenerateUniform(generator, A, len));
 }
 
+inline
 void generateUniform(
     hiprandGenerator_t generator, double* A, std::size_t len)
 {
     HIPRAND_CALL(hiprandGenerateUniformDouble(generator, A, len));
 }
 
+inline
 void generateUniform(
     hiprandGenerator_t generator, std::complex<float>* A, std::size_t len)
 {
     HIPRAND_CALL(hiprandGenerateUniform(generator, (float*)A, len*2));
 }
 
+inline
 void generateUniform(
     hiprandGenerator_t generator, std::complex<double>* A, std::size_t len)
 {
     HIPRAND_CALL(hiprandGenerateUniformDouble(generator, (double*)A, len*2));
 }
 
+inline
 void generateUniform(
     hiprandGenerator_t generator, int8_t* A, std::size_t len)
 {
@@ -55,6 +60,7 @@ void generateUniform(
 #endif
 }
 
+inline
 void generateUniform(
     hiprandGenerator_t generator, int32_t* A, std::size_t len)
 {
