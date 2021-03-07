@@ -8,6 +8,36 @@
 #include "DeviceBatchedGemm.h"
 
 //------------------------------------------------------------------------------
+/// \brief
+///     Creates a single BatchedGemm object.
+///
+/// \param[in] type_a_name, type_b_name, type_c_name
+///     the names of the data types of matrices A, B, and C respectively,
+///     e.g., R_32F, R_64F, C_32F, C_64F
+///
+/// \param[in] compute_type_name
+///     the name of the computing precision (data type),
+///     e.g., R_32F, R_64F, C_32F, C_64F (typically the same as type_c_name)
+///
+/// \param[in] op_a_name, op_b_name
+///     the name of the transposition opetations for A and B,
+///     i.e., OP_N, OP_T, or OP_C
+///
+/// \param[in] m, n, k
+///     the dimensions of the matrix multiplication operation
+///
+/// \param[in] lda, ldb, ldc
+///     the leading dimensions of A, B, and C respectively
+///
+/// \param[in] batch_count
+///     the number of matrices in the batch
+///
+/// \param[in] alpha, beta
+///     the alpha and beta factors in matrix multiplication
+///
+/// \param[in] device_id
+///     the number of the GPU executing the matrix multiplication
+///
 BatchedGemm*
 BatchedGemm::make(std::string type_a_name,
                   std::string type_b_name,
@@ -57,6 +87,24 @@ BatchedGemm::make(std::string type_a_name,
 }
 
 //------------------------------------------------------------------------------
+/// \brief
+///     Creates an array of BatchedGemm object, one for each GPU in the system.
+///
+/// \remark
+///     Not listing parameters common with BatchedGemm::make().
+///
+/// \param[in] host_a, host_b, host_c
+///     If true, indicates that the array is stored in host memory.
+///
+/// \param[in] coherent_a, coherent_b, coherent_c
+///     If true, and if the corresponding array is stored in host memory,
+///     indicates that the memory is allocated as hipHostMallocCoherent,
+///     i.e., it is not cached.
+///
+/// \param[in] shared_a, shared_b
+///     If true, indicates that the corresponding array is shared among all
+///     devices (either a HostArray or a DeviceArray stored on device 0).
+///
 void
 BatchedGemm::makeDevices(std::string type_a_name,
                          std::string type_b_name,

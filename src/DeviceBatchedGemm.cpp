@@ -8,6 +8,33 @@
 #include "DeviceBatchedGemm.h"
 
 //------------------------------------------------------------------------------
+/// \brief
+///     Creates a DeviceBatchedGemm object.
+///
+/// \param[in] compute_type
+///     the computing precision (data type),
+///     e.g., HIPBLAS_R_32F, HIPBLAS_R_64F, HIPBLAS_C_32F, HIPBLAS_C_64F
+///
+/// \param[in] op_a, op_b
+///     the transposition opetations for A and B,
+///     i.e., HIPBLAS_OP_N, HIPBLAS_OP_T, or HIPBLAS_OP_C
+///
+/// \param[in] a, b, c
+///     the input arrays A and B, and the output array C
+///
+/// \param[in] batch_count
+///     the number of matrices in the batch
+///
+/// \param[in] alpha, beta
+///     the alpha and beta factors in matrix multiplication
+///
+/// \param[in] operations
+///     number of floating point operations
+///     for one member of the batch (single matrix multiply)
+///
+/// \param[in] device_id
+///     the number of the device executing the operation
+///
 DeviceBatchedGemm::DeviceBatchedGemm(hipblasDatatype_t compute_type,
                                      hipblasOperation_t op_a,
                                      hipblasOperation_t op_b,
@@ -68,6 +95,18 @@ DeviceBatchedGemm::~DeviceBatchedGemm()
 }
 
 //------------------------------------------------------------------------------
+/// \brief
+///     Runs the workload.
+///
+/// \param[in] mode
+///     the mode of operation:
+///     - Standard:        regular GEMM, one precision
+///     - Batched:         batched GEMM, one precision
+///     - StridedBatched:  strided GEMM, one precision
+///     - StandardEx:      regular GEMM, multi-precision
+///     - BatchedEx:       batched GEMM, multi-precision
+///     - StridedBatchedEx strided GEMM, multi-precision
+///
 void DeviceBatchedGemm::run(Mode mode)
 {
     // Set the device.
@@ -98,6 +137,11 @@ void DeviceBatchedGemm::run(Mode mode)
 }
 
 //------------------------------------------------------------------------------
+/// \brief
+///     Runs the workload.
+///     Invokes the standard API in a loop.
+///     Collects the times for all calls.
+///
 void DeviceBatchedGemm::runGemm()
 {
     // Check if all types are the same.
@@ -123,6 +167,10 @@ void DeviceBatchedGemm::runGemm()
 }
 
 //------------------------------------------------------------------------------
+/// \brief
+///     Runs the workload.
+///     Invokes the batched API once and collects the time.
+///
 void DeviceBatchedGemm::runBatchedGemm()
 {
     // Check if all types are the same.
@@ -147,6 +195,10 @@ void DeviceBatchedGemm::runBatchedGemm()
 }
 
 //------------------------------------------------------------------------------
+/// \brief
+///     Runs the workload.
+///     Invokes the strided batched API once and collects the time.
+///
 void DeviceBatchedGemm::runStridedBatchedGemm()
 {
     // Check if all types are the same.
@@ -176,6 +228,11 @@ void DeviceBatchedGemm::runStridedBatchedGemm()
 }
 
 //------------------------------------------------------------------------------
+/// \brief
+///     Runs the workload.
+///     Invokes the Ex API in a loop.
+///     Collects the times of all calls.
+///
 void DeviceBatchedGemm::runGemmEx()
 {
     // Call in a loop, record events.
@@ -197,6 +254,10 @@ void DeviceBatchedGemm::runGemmEx()
 }
 
 //------------------------------------------------------------------------------
+/// \brief
+///     Runs the workload.
+///     Invokes the batched Ex API once and collects the time.
+///
 void DeviceBatchedGemm::runBatchedGemmEx()
 {
     // Call once, record start and stop.
@@ -219,6 +280,10 @@ void DeviceBatchedGemm::runBatchedGemmEx()
 }
 
 //------------------------------------------------------------------------------
+/// \brief
+///     Runs the workload.
+///     Invokes the strided batched Ex API once and collects the time.
+///
 void DeviceBatchedGemm::runStridedBatchedGemmEx()
 {
     // Compute strides (= sizes of matrices).
@@ -244,6 +309,18 @@ void DeviceBatchedGemm::runStridedBatchedGemmEx()
 }
 
 //------------------------------------------------------------------------------
+/// \brief
+///     Returns the GLOPS number for the run.
+///
+/// \param[in] mode
+///     the mode of operation:
+///     - Standard:        regular GEMM, one precision
+///     - Batched:         batched GEMM, one precision
+///     - StridedBatched:  strided GEMM, one precision
+///     - StandardEx:      regular GEMM, multi-precision
+///     - BatchedEx:       batched GEMM, multi-precision
+///     - StridedBatchedEx strided GEMM, multi-precision
+///
 double DeviceBatchedGemm::getGflops(Mode mode)
 {
     // Set the device.

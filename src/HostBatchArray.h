@@ -26,8 +26,22 @@ public:
 };
 
 //------------------------------------------------------------------------------
-/// \todo Explore direct access to pointer arrays in host memory
-///       (should be okay to use NonCoherent).
+/// \brief
+///     Creates a HostBatchArray object.
+///
+/// \param[in] type
+///     the data type, e.g., HIPBLAS_R_64F
+///
+/// \param[in] m, n, ld
+///     the width, height, and leading dimension of the matrices in the batch.
+///
+/// \param[in] batch_count
+///     the number of matrices in the batch
+///
+/// \param[in] coherent
+///     If true, host memory allocated as hipHostMallocCoherent (not cached).
+///     If false, host memory allocated as hipHostMallocNonCoherent (cached).
+///
 template <typename T>
 inline
 HostBatchArray<T>::HostBatchArray(hipblasDatatype_t type,

@@ -29,6 +29,21 @@ private:
 };
 
 //------------------------------------------------------------------------------
+/// \brief
+///     Creates a DeviceBatchArray object.
+///
+/// \param[in] type
+///     the data type, e.g., HIPBLAS_R_64F
+///
+/// \param[in] m, n, ld
+///     the width, height, and leading dimension of the matrices in the batch.
+///
+/// \param[in] batch_count
+///     the number of matrices in the batch
+///
+/// \param[in] device_id
+///     the number of the device storing the array.
+///
 template <typename T>
 inline
 DeviceBatchArray<T>::DeviceBatchArray(hipblasDatatype_t type,

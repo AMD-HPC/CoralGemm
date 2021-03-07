@@ -17,6 +17,10 @@
 #endif
 
 //------------------------------------------------------------------------------
+/// \brief
+///     Base class for representing arrays in host memory or device memory.
+///     Serves as the parent class for the templated class BatchArray.
+///
 class BaseBatchArray {
 public:
     static BaseBatchArray* make(hipblasDatatype_t type,
@@ -25,6 +29,24 @@ public:
                                 int device_id,
                                 bool coherent = true);
 
+    /// \brief
+    ///     Creates a BaseBatchArray object.
+    ///
+    /// \param[in] type
+    ///     the data type, e.g., HIPBLAS_R_64F
+    ///
+    /// \param[in] m
+    ///     the height of the matrices in the batch
+    ///
+    /// \param[in] n
+    ///     the width of the matrices in the batch
+    ///
+    /// \param[in] ld
+    ///     the leading dimension of each matrix in the batch
+    ///
+    /// \param[in] batch_count
+    ///     the number of matrices in the batch
+    ///
     BaseBatchArray(hipblasDatatype_t type,
                    int m, int n, int ld,
                    int batch_count)
@@ -38,18 +60,26 @@ public:
     int ld() const { return ld_; }
     hipblasDatatype_t type() const { return type_; }
 
+    /// Returns the pointer to the memory occupied by the batch.
     virtual void* data() const = 0;
+
+    /// Returns the pointer of a specific matrix in the batch.
     virtual void* h_array(int i) const = 0;
+
+    /// Returns the array of pointers in device memory.
     virtual void** d_array() const = 0;
 
+    /// Populates the batch with random data.
     virtual void generateUniform(int device_id,
                                  hiprandGenerator_t generator) = 0;
+
+    /// Populates the batch with a specific value.
     virtual void generateConstant(int device_id, double val) = 0;
 
 protected:
-    hipblasDatatype_t type_; ///< data type, e.g., HIPBLAS_R_64F
-    int m_;                  ///< height of each matrix in the batch
-    int n_;                  ///< width of each matrix in the batch
-    int ld_;                 ///< leading dimension of each matrix in the batch
-    int batch_count_;        ///< number of matrices in the batch
+    hipblasDatatype_t type_; ///< the data type, e.g., HIPBLAS_R_64F
+    int m_;                  ///< the height of each matrices in the batch
+    int n_;                  ///< the width of each matrix in the batch
+    int ld_;                 ///< the leading dimension of each matrix
+    int batch_count_;        ///< the number of matrices in the batch
 };

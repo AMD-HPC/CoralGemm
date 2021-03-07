@@ -17,10 +17,11 @@
 #include <cublas_v2.h>
 #endif
 
-/// C++ wrappers for hipBLAS routines
+/// C++ wrappers for hipBLAS
 namespace hipblas {
 
 //------------------------------------------------------------------------------
+/// standard GEMM (float)
 inline
 void gemm(hipblasHandle_t handle,
           hipblasOperation_t op_a,
@@ -40,6 +41,7 @@ void gemm(hipblasHandle_t handle,
                               beta,  C, ldc));
 }
 
+/// standard GEMM (double)
 inline
 void gemm(hipblasHandle_t handle,
           hipblasOperation_t op_a,
@@ -59,6 +61,7 @@ void gemm(hipblasHandle_t handle,
                               beta,  C, ldc));
 }
 
+/// standard GEMM (complex<float>)
 inline
 void gemm(hipblasHandle_t handle,
           hipblasOperation_t op_a,
@@ -80,6 +83,7 @@ void gemm(hipblasHandle_t handle,
                               (hipblasComplex*)C, ldc));
 }
 
+/// standard GEMM (complex<double>)
 inline
 void gemm(hipblasHandle_t handle,
           hipblasOperation_t op_a,
@@ -101,6 +105,7 @@ void gemm(hipblasHandle_t handle,
                               (hipblasDoubleComplex*)C, ldc));
 }
 
+/// standard GEMM with dispatch based on `hipblasDatatype_t`
 inline
 void gemm(hipblasDatatype_t type,
           hipblasHandle_t handle,
@@ -160,6 +165,7 @@ void gemm(hipblasDatatype_t type,
 }
 
 //------------------------------------------------------------------------------
+/// batched GEMM (float)
 inline
 void gemmBatched(hipblasHandle_t handle,
                  hipblasOperation_t op_a,
@@ -181,6 +187,7 @@ void gemmBatched(hipblasHandle_t handle,
                                      batch_count));
 }
 
+/// batched GEMM (double)
 inline
 void gemmBatched(hipblasHandle_t handle,
                  hipblasOperation_t op_a,
@@ -202,6 +209,7 @@ void gemmBatched(hipblasHandle_t handle,
                                      batch_count));
 }
 
+/// batched GEMM (complex<float>)
 inline
 void gemmBatched(hipblasHandle_t handle,
                  hipblasOperation_t op_a,
@@ -225,6 +233,7 @@ void gemmBatched(hipblasHandle_t handle,
                                      batch_count));
 }
 
+/// batched GEMM (complex<double>)
 inline
 void gemmBatched(hipblasHandle_t handle,
                  hipblasOperation_t op_a,
@@ -248,6 +257,7 @@ void gemmBatched(hipblasHandle_t handle,
                                      batch_count));
 }
 
+/// batched GEMM with dispatch based on `hipblasDatatype_t`
 inline
 void gemmBatched(hipblasDatatype_t type,
                  hipblasHandle_t handle,
@@ -312,6 +322,7 @@ void gemmBatched(hipblasDatatype_t type,
 }
 
 //------------------------------------------------------------------------------
+/// strided batched GEMM (float)
 inline
 void gemmStridedBatched(
     hipblasHandle_t handle,
@@ -335,6 +346,7 @@ void gemmStridedBatched(
                                    batch_count));
 }
 
+/// strided batched GEMM (double)
 inline
 void gemmStridedBatched(
     hipblasHandle_t handle,
@@ -358,6 +370,7 @@ void gemmStridedBatched(
                                    batch_count));
 }
 
+/// strided batched GEMM (complex<float>)
 inline
 void gemmStridedBatched(
     hipblasHandle_t handle,
@@ -384,6 +397,7 @@ void gemmStridedBatched(
             batch_count));
 }
 
+/// strided batched GEMM (complex<double>)
 inline
 void gemmStridedBatched(
     hipblasHandle_t handle,
@@ -409,7 +423,9 @@ void gemmStridedBatched(
             (hipblasDoubleComplex*)C, ldc, strideC,
             batch_count));
 }
- inline
+
+/// strided batched GEMM with dispatch based on `hipblasDatatype_t`
+inline
 void gemmStridedBatched(
     hipblasDatatype_t type,
     hipblasHandle_t handle,

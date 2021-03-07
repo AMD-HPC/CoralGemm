@@ -1,52 +1,30 @@
-
+//------------------------------------------------------------------------------
+/// \file
+/// \brief      main CoralGemm driver routines
+/// \date       2020-2021
+/// \author     Jakub Kurzak
+/// \copyright  Advanced Micro Devices, Inc.
+///
 #include "DeviceBatchArray.h"
 #include "DeviceBatchedGemm.h"
 
 #include <iostream>
 
 //------------------------------------------------------------------------------
-/*
-    ./gemm PRECISION_A
-           PRECISION_B
-           PRECISION_C
-           COMPUTE_PRECISION
-           OP_A
-           OP_B
-           M
-           N
-           K
-           LDA
-           LDB
-           LDC
-           BATCH_COUNT
-           TIME_SPAN    runtime duration in seconds
-           [batched]    run batched GEMM
-           [strided]    run strided batched GEMM
-           [ex]         use the Ex API
-           [hostA]      A in host memory
-           [hostB]      B in host memory
-           [hostC]      C in host memory
-           [coherentA]  if in host memory, A is coherent (not cached)
-           [coherentB]  if in host memory, B is coherent (not cached)
-           [coherentC]  if in host memory, C is coherent (not cached)
-           [sharedA]    one A for all devices
-           [sharedB]    one B for all devices
-
-    supported precisions:
-        - R_32F: float
-        - R_64F: double
-        - C_32F: float complex
-        - C_64F: float double
-        - R_8I:  8-bit int
-        - R_32I: 32-bit int
-
-    supported ops:
-        - OP_N: non-transposed
-        - OP_T: transposed
-        - OP_C: conjugate-transposed
-*/
-
-//------------------------------------------------------------------------------
+/// \brief
+///     Scans the command line.
+///     Creates BatchedGemm objects for all devices in the system.
+///     Initializes the matrices with random numbers (uniform distribution).
+///     Loops over the matrix multiplication routines until duration reached.
+///     Prints GFLOPS numbers for all devices, followed by the timestamp.
+///     Skips printing of the first row of results (considered a warmup call).
+///
+/// \param[in] argc, argv
+///     command line arguments
+///
+/// \todo
+///     Implement rudimentary testing based on constant initialization.
+///
 void run (int argc, char** argv)
 {
     ASSERT(argc >= 15);
@@ -187,6 +165,50 @@ void run (int argc, char** argv)
 }
 
 //------------------------------------------------------------------------------
+/// \brief
+///     Launches the run inside a `try` block.
+///     Caches and reports exceptions.
+///
+///     Usage: ./gemm
+///         PRECISION_A         precision of A
+///         PRECISION_B         precision of B
+///         PRECISION_C         precision of C
+///         COMPUTE_PRECISION   precision of the computation
+///         OP_A                transposition of A
+///         OP_B                transposition of B
+///         M                   M dimension
+///         N                   N dimension
+///         K                   K dimension
+///         LDA                 leading dimension of A
+///         LDB                 leading dimension of B
+///         LDC                 leading dimension of C
+///         BATCH_COUNT         number of matrices in the batch
+///         TIME_SPAN           runtime duration in seconds
+///         [batched]           use the batched API
+///         [strided]           use the strided batched API
+///         [ex]                use the Ex API
+///         [hostA]             A in host memory
+///         [hostB]             B in host memory
+///         [hostC]             C in host memory
+///         [coherentA]         if in host memory, A is coherent (not cached)
+///         [coherentB]         if in host memory, B is coherent (not cached)
+///         [coherentC]         if in host memory, C is coherent (not cached)
+///         [sharedA]           used one shared A for all devices
+///         [sharedB]           used one shared B for all devices
+///
+///     supported precisions:
+///     - R_32F: float
+///     - R_64F: double
+///     - C_32F: float complex
+///     - C_64F: float double
+///     - R_8I:  8-bit int
+///     - R_32I: 32-bit int
+///
+///     supported ops:
+///     - OP_N: non-transposed
+///     - OP_T: transposed
+///     - OP_C: conjugate-transposed
+///
 int main(int argc, char** argv)
 {
     try {

@@ -28,6 +28,14 @@
 #endif
 
 //------------------------------------------------------------------------------
+/// \brief
+///     Implements benchmarking of matrix multiplication on GPUs.
+///     Inherits from the BatchedGemm class.
+///
+/// \todo
+///     Explore direct access to pointer arrays in host memory
+///     (check the effects of using hipHostMallocNonCoherent).
+///
 class DeviceBatchedGemm: public BatchedGemm {
 public:
     DeviceBatchedGemm(hipblasDatatype_t compute_type,
@@ -43,6 +51,7 @@ public:
                       int device_id = 0);
     ~DeviceBatchedGemm();
 
+    /// Populates the batch with random data.
     void generateUniform() override
     {
         a_->generateUniform(device_id_, hiprand_generator_);
@@ -50,6 +59,7 @@ public:
         c_->generateUniform(device_id_, hiprand_generator_);
     }
 
+    /// Populates the batch with a specific value.
     void generateConstant(double val) override
     {
         a_->generateConstant(device_id_, val);
@@ -68,12 +78,12 @@ private:
     void runBatchedGemmEx();
     void runStridedBatchedGemmEx();
 
-    int device_id_; ///< number of the device executing the operation
+    int device_id_; ///< the number of the device executing the operation
 
-    hipStream_t hip_stream_;
-    hipblasHandle_t hipblas_handle_;
-    hiprandGenerator_t hiprand_generator_;
+    hipStream_t hip_stream_;               ///< stream for the operation
+    hipblasHandle_t hipblas_handle_;       ///< handle for the operation
+    hiprandGenerator_t hiprand_generator_; ///< random number generator
 
-    std::vector<hipEvent_t> start;
-    std::vector<hipEvent_t> stop;
+    std::vector<hipEvent_t> start; ///< events for recording start times
+    std::vector<hipEvent_t> stop;  ///< events for recording end times
 };

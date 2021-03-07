@@ -9,8 +9,32 @@
 #include "DeviceBatchArray.h"
 
 //------------------------------------------------------------------------------
-// https://docs.nvidia.com/cuda/cublas/index.html#cuda_datatype_tStream<T>*
-//
+/// \brief
+///     Creates either a HostBatchArray or a DeviceBatchArray.
+///
+/// \param[in] type
+///     the data type, e.g., HIPBLAS_R_64F
+///
+/// \param[in] m, n, ld
+///     the width, height, and leading dimension of the matrices in the batch
+///
+/// \param[in] batch_count
+///     the number of matrices in the batch
+///
+/// \param[in] device_id
+///     Zero of larger indicates the number of the GPU storing the array.
+///     Negative number indicates that the array is stored in host memory.
+///
+/// \param[in] coherent
+///     If true, host memory allocated as hipHostMallocCoherent (not cached).
+///     If false, host memory allocated as hipHostMallocNonCoherent (cached).
+///
+/// \remark
+///     Currently, supports a subset of types.
+///     The full list of types is available in the cuBLAS User Guide
+///     (https://docs.nvidia.com/cuda/cublas/index.html#
+///     cuda_datatype_tStream<T>*).
+///
 BaseBatchArray*
 BaseBatchArray::make(hipblasDatatype_t type,
                      int m, int n, int ld,
