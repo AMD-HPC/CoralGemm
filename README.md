@@ -72,6 +72,7 @@ ROC_FLAGS  = --amdgpu-target=gfx906,gfx908,gfx90a
            [coherentC]  if in host memory, C is coherent (not cached)
            [sharedA]    one A for all devices
            [sharedB]    one B for all devices
+           [testing]    perform a basic sanity check
 ```
 
 ### Supported Precisions:
@@ -95,12 +96,18 @@ ROC_FLAGS  = --amdgpu-target=gfx906,gfx908,gfx90a
 * allocates `BATCH_SIZE` number of matrices A, B, and C
 * initializes with hipRAND (random uniform, 0.0 to 1.0)
 * calls hipBLAS and collects execution times using `std::chrono`
-* sets *alpha* to 2.71828 and *beta* to *3.14159*
+* sets `alpha` to 2.71828 and `beta` to *3.14159*
 * for `hipblas?gemm[Ex]` launches a sequence of calls and takes the median time
 * for `hipblas?gemm[Strided]Batched[Ex]` launches one call and takes the overall time
 * reports the corresponding GFLOPS
 * repeats until `TIME_SPAN` exceeded
 * executes simulteneously on all devices
+
+If `testing` is set, a primitive sanity test is ran.
+Entries of A, B, and C are set to 1, and so are the factors `alpha` and `beta`.
+Then, after GEMM is ran, all entries of C are checked to contain k+1.
+Note that performance is usually much higher when using integer initialization
+then when using random data.
 
 ## Help
 

@@ -76,6 +76,9 @@ public:
     /// Populates the batch with a specific value.
     virtual void generateConstant(int device_id, double val) = 0;
 
+    /// Checks if the batch contains a specific value.
+    virtual void validateConstant(int device_id, double val) = 0;
+
 protected:
     hipblasDatatype_t type_; ///< the data type, e.g., HIPBLAS_R_64F
     int m_;                  ///< the height of each matrices in the batch

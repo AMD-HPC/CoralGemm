@@ -29,34 +29,6 @@ void run (int argc, char** argv)
 {
     ASSERT(argc >= 15);
 
-    void* alpha;
-    void* beta;
-
-    float                alpha_r_32f = 2.71828;
-    double               alpha_r_64f = 2.71828;
-    std::complex<float>  alpha_c_32f = 2.71828;
-    std::complex<double> alpha_c_64f = 2.71828;
-    int32_t              alpha_r_32i = 2;
-
-    float                beta_r_32f = 3.14159;
-    double               beta_r_64f = 3.14159;
-    std::complex<float>  beta_c_32f = 3.14159;
-    std::complex<double> beta_c_64f = 3.14159;
-    int32_t              beta_r_32i = 3;
-
-    std::string type_c(argv[3]);
-    if      (type_c == "R_32F") alpha = &alpha_r_32f;
-    else if (type_c == "R_64F") alpha = &alpha_r_64f;
-    else if (type_c == "C_32F") alpha = &alpha_c_32f;
-    else if (type_c == "C_64F") alpha = &alpha_c_64f;
-    else if (type_c == "R_32I") alpha = &alpha_r_32i;
-
-    if      (type_c == "R_32F") beta = &beta_r_32f;
-    else if (type_c == "R_64F") beta = &beta_r_64f;
-    else if (type_c == "C_32F") beta = &beta_c_32f;
-    else if (type_c == "C_64F") beta = &beta_c_64f;
-    else if (type_c == "R_32I") beta = &beta_r_32i;
-
     bool batched = false;
     bool strided = false;
     bool ex = false;
@@ -68,6 +40,7 @@ void run (int argc, char** argv)
     bool coherent_c = false;
     bool shared_a = false;
     bool shared_b = false;
+    bool testing = false;
 
     int arg = 15;
     while (arg < argc) {
@@ -83,8 +56,64 @@ void run (int argc, char** argv)
         if (str == "coherentC") coherent_c = true;
         if (str == "sharedA")   shared_a = true;
         if (str == "sharedB")   shared_b = true;
+        if (str == "testing")   testing = true;
         ++arg;
     }
+
+    float                alpha_r_32f;
+    double               alpha_r_64f;
+    std::complex<float>  alpha_c_32f;
+    std::complex<double> alpha_c_64f;
+    int32_t              alpha_r_32i;
+
+    float                beta_r_32f;
+    double               beta_r_64f;
+    std::complex<float>  beta_c_32f;
+    std::complex<double> beta_c_64f;
+    int32_t              beta_r_32i;
+
+    if (testing) {
+        alpha_r_32f = 1.0;
+        alpha_r_64f = 1.0;
+        alpha_c_32f = 1.0;
+        alpha_c_64f = 1.0;
+        alpha_r_32i = 1;
+
+        beta_r_32f = 1.0;
+        beta_r_64f = 1.0;
+        beta_c_32f = 1.0;
+        beta_c_64f = 1.0;
+        beta_r_32i = 1;
+    }
+    else {
+        alpha_r_32f = 2.71828;
+        alpha_r_64f = 2.71828;
+        alpha_c_32f = 2.71828;
+        alpha_c_64f = 2.71828;
+        alpha_r_32i = 2;
+
+        beta_r_32f = 3.14159;
+        beta_r_64f = 3.14159;
+        beta_c_32f = 3.14159;
+        beta_c_64f = 3.14159;
+        beta_r_32i = 3;
+    }
+
+    void* alpha;
+    void* beta;
+
+    std::string type_c(argv[3]);
+    if      (type_c == "R_32F") alpha = &alpha_r_32f;
+    else if (type_c == "R_64F") alpha = &alpha_r_64f;
+    else if (type_c == "C_32F") alpha = &alpha_c_32f;
+    else if (type_c == "C_64F") alpha = &alpha_c_64f;
+    else if (type_c == "R_32I") alpha = &alpha_r_32i;
+
+    if      (type_c == "R_32F") beta = &beta_r_32f;
+    else if (type_c == "R_64F") beta = &beta_r_64f;
+    else if (type_c == "C_32F") beta = &beta_c_32f;
+    else if (type_c == "C_64F") beta = &beta_c_64f;
+    else if (type_c == "R_32I") beta = &beta_r_32i;
 
     std::vector<BatchedGemm*> dev_gemms;
     BatchedGemm::makeDevices(std::string(argv[1]), // type a
@@ -123,10 +152,12 @@ void run (int argc, char** argv)
         else    mode = BatchedGemm::Mode::Standard;
     }
 
-    // Initialize with random numbers.
+    // Initialize with a constant or random numbers.
     for (int dev = 0; dev < dev_gemms.size(); ++dev) {
-//      dev_gemms[dev]->generateConstant(1.0);
-        dev_gemms[dev]->generateUniform();
+        if (testing)
+            dev_gemms[dev]->generateConstant(1.0);
+        else
+            dev_gemms[dev]->generateUniform();
     }
 
     // Print column labels.
@@ -141,6 +172,13 @@ void run (int argc, char** argv)
         // Run on all devices.
         for (int dev = 0; dev < dev_gemms.size(); ++dev) {
             dev_gemms[dev]->run(mode);
+        }
+
+        // Test the first pass.
+        if (count == 0 && testing) {
+            for (int dev = 0; dev < dev_gemms.size(); ++dev) {
+                dev_gemms[dev]->validateConstant(std::atoi(argv[9])+1);
+            }
         }
 
         // Report GFLOPS.

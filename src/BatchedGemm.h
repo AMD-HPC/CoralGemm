@@ -177,6 +177,9 @@ public:
     /// Populates the batch with a specific value.
     virtual void generateConstant(double val) = 0;
 
+    /// Checks if the output contains a specific value.
+    virtual void validateConstant(double val) = 0;
+
     /// Runs the workload.
     virtual void run(Mode mode) = 0;
 

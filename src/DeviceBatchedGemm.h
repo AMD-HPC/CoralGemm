@@ -67,6 +67,11 @@ public:
         c_->generateConstant(device_id_, val);
     }
 
+    void validateConstant(double val) override
+    {
+        c_->validateConstant(device_id_, val);
+    }
+
     void run(Mode mode) override;
     double getGflops(Mode mode) override;
 

@@ -8,6 +8,8 @@
 #include "HostBatchArray.h"
 #include "DeviceBatchArray.h"
 
+#include <hip/hip_bfloat16.h>
+
 //------------------------------------------------------------------------------
 /// \brief
 ///     Creates either a HostBatchArray or a DeviceBatchArray.
@@ -45,7 +47,9 @@ BaseBatchArray::make(hipblasDatatype_t type,
     if (device_id < 0) {
         // Return HostBatchArray
         switch (type) {
-//          case HIPBLAS_R_16F:
+            case HIPBLAS_R_16F:
+                return new HostBatchArray<__half>(
+                    type, m, n, ld, batch_count, coherent);
             case HIPBLAS_R_32F:
                 return new HostBatchArray<float>(
                     type, m, n, ld, batch_count, coherent);
@@ -75,7 +79,9 @@ BaseBatchArray::make(hipblasDatatype_t type,
 //          case HIPBLAS_C_8U:
 //          case HIPBLAS_C_32I:
 //          case HIPBLAS_C_32U:
-//          case HIPBLAS_R_16B:
+            case HIPBLAS_R_16B:
+                return new HostBatchArray<hip_bfloat16>(
+                    type, m, n, ld, batch_count, coherent);
 //          case HIPBLAS_C_16B:
             default:
                 ERROR("unsupported data type");
@@ -84,7 +90,9 @@ BaseBatchArray::make(hipblasDatatype_t type,
     else {
         // Return DeviceBatchArray
         switch (type) {
-//          case HIPBLAS_R_16F:
+            case HIPBLAS_R_16F:
+                return new DeviceBatchArray<__half>(
+                    type, m, n, ld, batch_count, device_id);
             case HIPBLAS_R_32F:
                 return new DeviceBatchArray<float>(
                     type, m, n, ld, batch_count, device_id);
@@ -114,7 +122,9 @@ BaseBatchArray::make(hipblasDatatype_t type,
 //          case HIPBLAS_C_8U:
 //          case HIPBLAS_C_32I:
 //          case HIPBLAS_C_32U:
-//          case HIPBLAS_R_16B:
+            case HIPBLAS_R_16B:
+                return new DeviceBatchArray<hip_bfloat16>(
+                    type, m, n, ld, batch_count, device_id);
 //          case HIPBLAS_C_16B:
             default:
                 ERROR("unsupported data type");

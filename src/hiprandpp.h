@@ -11,6 +11,7 @@
 
 #if defined(__HIPCC__) || defined(__HIP_PLATFORM__)
 #include <hiprand.h>
+#include <hip/hip_bfloat16.h>
 #endif
 
 #if defined(__NVCC__)
@@ -73,6 +74,22 @@ void generateUniform(
     hiprandGenerator_t generator, int32_t* A, std::size_t len)
 {
     HIPRAND_CALL(hiprandGenerate(generator, (unsigned int*)A, len));
+}
+
+/// Generate uniform (__half).
+inline
+void generateUniform(
+    hiprandGenerator_t generator, __half* A, std::size_t len)
+{
+    ERROR("Random initialization of R_16F not supported.");
+}
+
+/// Generate uniform (hip_bfloat16).
+inline
+void generateUniform(
+    hiprandGenerator_t generator, hip_bfloat16* A, std::size_t len)
+{
+    ERROR("Random initialization of R_16B not supported.");
 }
 
 } // namespace hiprand

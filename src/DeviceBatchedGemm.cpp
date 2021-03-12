@@ -238,17 +238,18 @@ void DeviceBatchedGemm::runGemmEx()
     // Call in a loop, record events.
     for (int i = 0; i < batch_count_; ++i) {
         HIP_CALL(hipEventRecord(start[i]));
-        hipblasGemmEx(hipblas_handle_,
-                      op_a_,
-                      op_b_,
-                      c_->m(),
-                      c_->n(),
-                      op_a_ == HIPBLAS_OP_N ? a_->n() : a_->m(),
-                      alpha_, a_->h_array(i), a_->type(), a_->ld(),
-                              b_->h_array(i), b_->type(), b_->ld(),
-                      beta_,  c_->h_array(i), c_->type(), c_->ld(),
-                      compute_type_,
-                      HIPBLAS_GEMM_DEFAULT);
+        HIPBLAS_CALL(
+            hipblasGemmEx(hipblas_handle_,
+                          op_a_,
+                          op_b_,
+                          c_->m(),
+                          c_->n(),
+                          op_a_ == HIPBLAS_OP_N ? a_->n() : a_->m(),
+                          alpha_, a_->h_array(i), a_->type(), a_->ld(),
+                                  b_->h_array(i), b_->type(), b_->ld(),
+                          beta_,  c_->h_array(i), c_->type(), c_->ld(),
+                          compute_type_,
+                          HIPBLAS_GEMM_DEFAULT));
         HIP_CALL(hipEventRecord(stop[i]));
     }
 }
@@ -262,20 +263,21 @@ void DeviceBatchedGemm::runBatchedGemmEx()
 {
     // Call once, record start and stop.
     HIP_CALL(hipEventRecord(start[0]));
-    hipblasGemmBatchedEx(hipblas_handle_,
-                         op_a_,
-                         op_b_,
-                         c_->m(),
-                         c_->n(),
-                         op_a_ == HIPBLAS_OP_N ? a_->n() : a_->m(),
-                         alpha_,
-                         (void const**)a_->d_array(), a_->type(), a_->ld(),
-                         (void const**)b_->d_array(), b_->type(), b_->ld(),
-                         beta_,
-                         c_->d_array(), c_->type(), c_->ld(),
-                         batch_count_,
-                         compute_type_,
-                         HIPBLAS_GEMM_DEFAULT);
+    HIPBLAS_CALL(
+        hipblasGemmBatchedEx(hipblas_handle_,
+                             op_a_,
+                             op_b_,
+                             c_->m(),
+                             c_->n(),
+                             op_a_ == HIPBLAS_OP_N ? a_->n() : a_->m(),
+                             alpha_,
+                             (void const**)a_->d_array(), a_->type(), a_->ld(),
+                             (void const**)b_->d_array(), b_->type(), b_->ld(),
+                             beta_,
+                             c_->d_array(), c_->type(), c_->ld(),
+                             batch_count_,
+                             compute_type_,
+                             HIPBLAS_GEMM_DEFAULT));
     HIP_CALL(hipEventRecord(stop[0]));
 }
 
