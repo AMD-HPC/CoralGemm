@@ -19,7 +19,7 @@
 ## Installing
 
 * `cd src`
-* `make rocm`
+* `make`
 
 Make sure to add `gfx90a` to the list of target architectures in the Makefile
 before compiling for MI200, i.e.:
