@@ -73,7 +73,7 @@ public:
     }
 
     void run(Mode mode) override;
-    double getGflops(Mode mode) override;
+    std::pair<double, double> getGflops(Mode mode) override;
 
 private:
     void runGemm();

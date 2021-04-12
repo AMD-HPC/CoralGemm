@@ -195,7 +195,7 @@ public:
     ///     - BatchedEx:       batched GEMM, multi-precision
     ///     - StridedBatchedEx strided GEMM, multi-precision
     ///
-    virtual double getGflops(Mode mode) = 0;
+    virtual std::pair<double, double> getGflops(Mode mode) = 0;
 
 protected:
     /// \brief

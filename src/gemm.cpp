@@ -41,6 +41,7 @@ void run (int argc, char** argv)
     bool shared_a = false;
     bool shared_b = false;
     bool testing = false;
+    bool times = false;
 
     int arg = 15;
     while (arg < argc) {
@@ -57,6 +58,7 @@ void run (int argc, char** argv)
         if (str == "sharedA")   shared_a = true;
         if (str == "sharedB")   shared_b = true;
         if (str == "testing")   testing = true;
+        if (str == "times")     times = true;
         ++arg;
     }
 
@@ -163,7 +165,11 @@ void run (int argc, char** argv)
     // Print column labels.
     for (int dev = 0; dev < dev_gemms.size(); ++dev)
         printf(" device_%d_[GFLOPS]", dev);
-    printf(" timestamp_[sec]\n");
+    printf(" timestamp_[sec]");
+    if (times)
+        for (int dev = 0; dev < dev_gemms.size(); ++dev)
+            printf(" device_%d_[us]", dev);
+    printf("\n");
 
     int count = 0;
     double timestamp;
@@ -181,12 +187,17 @@ void run (int argc, char** argv)
             }
         }
 
-        // Report GFLOPS.
+        // Collect GFLOPS numbers and execution times.
+        // Print GFLOPS numbers.
+        std::vector<double> gflops(dev_gemms.size());
+        std::vector<double> time_in_sec(dev_gemms.size());
         for (int dev = 0; dev < dev_gemms.size(); ++dev) {
-            double gflops;
-            gflops = dev_gemms[dev]->getGflops(mode);
-            if (count > 0)
-                printf("%18.2lf", gflops);
+            auto retval = dev_gemms[dev]->getGflops(mode);
+            gflops[dev] = retval.first;
+            time_in_sec[dev] = retval.second;
+            if (count > 0) {
+                printf("%18.2lf", gflops[dev]);
+            }
         }
 
         // Collect the timestamp.
@@ -194,7 +205,19 @@ void run (int argc, char** argv)
         timestamp = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::high_resolution_clock::now()-beginning).count();
         if (count > 0)
-            printf("%16.2lf\n", timestamp/1e6);
+            printf("%16.2lf", timestamp/1e6);
+
+        // Print execution times.
+        if (times) {
+            for (int dev = 0; dev < dev_gemms.size(); ++dev) {
+                if (count > 0) {
+                    printf("%14.0lf", time_in_sec[dev]*1e6);
+                }
+            }
+        }
+
+        if (count > 0)
+            printf("\n");
 
         ++count;
     }

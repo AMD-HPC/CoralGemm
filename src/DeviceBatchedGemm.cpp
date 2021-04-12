@@ -323,12 +323,13 @@ void DeviceBatchedGemm::runStridedBatchedGemmEx()
 ///     - BatchedEx:       batched GEMM, multi-precision
 ///     - StridedBatchedEx strided GEMM, multi-precision
 ///
-double DeviceBatchedGemm::getGflops(Mode mode)
+std::pair<double, double> DeviceBatchedGemm::getGflops(Mode mode)
 {
     // Set the device.
     hipSetDevice(device_id_);
 
     double gflops;
+    double time_in_sec;
     if (mode == Mode::Standard || mode == Mode::StandardEx) {
         // Report GFLOPS based on the median time.
         std::vector<float> elapsed(batch_count_);
@@ -338,7 +339,7 @@ double DeviceBatchedGemm::getGflops(Mode mode)
 
         std::sort(elapsed.begin(), elapsed.end(), std::greater<float>());
         double median_time = elapsed[batch_count_/2];
-        double time_in_sec = median_time/1e3;
+        time_in_sec = median_time/1e3;
         gflops = operations_/time_in_sec/1e9;
     }
     else {
@@ -347,8 +348,8 @@ double DeviceBatchedGemm::getGflops(Mode mode)
         float elapsed;
         HIP_CALL(hipEventSynchronize(stop[0]));
         hipEventElapsedTime(&elapsed, start[0], stop[0]);
-        double time_in_sec = elapsed/1e3;
+        time_in_sec = elapsed/1e3;
         gflops = operations_*batch_count_/time_in_sec/1e9;
     }
-    return gflops;
+    return {gflops, time_in_sec};
 }
