@@ -73,6 +73,7 @@ ROC_FLAGS  = --amdgpu-target=gfx906,gfx908,gfx90a
            [sharedA]    one A for all devices
            [sharedB]    one B for all devices
            [testing]    perform a basic sanity check
+           [times]      print time in microseconds in addition to GFLOPS 
 ```
 
 ### Supported Precisions:
