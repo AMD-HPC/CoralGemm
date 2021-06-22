@@ -97,7 +97,7 @@ ROC_FLAGS  = --amdgpu-target=gfx906,gfx908,gfx90a
 * allocates `BATCH_SIZE` number of matrices A, B, and C
 * initializes with hipRAND (random uniform, 0.0 to 1.0)
 * calls hipBLAS and collects execution times using `std::chrono`
-* sets `alpha` to 2.71828 and `beta` to *3.14159*
+* sets `alpha` to 2.71828 and `beta` to 3.14159
 * for `hipblas?gemm[Ex]` launches a sequence of calls and takes the median time
 * for `hipblas?gemm[Strided]Batched[Ex]` launches one call and takes the overall time
 * reports the corresponding GFLOPS
