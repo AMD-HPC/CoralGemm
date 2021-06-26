@@ -40,6 +40,7 @@ void run (int argc, char** argv)
     bool coherent_c = false;
     bool shared_a = false;
     bool shared_b = false;
+    bool zero_beta = false;
     bool testing = false;
     bool times = false;
 
@@ -57,6 +58,7 @@ void run (int argc, char** argv)
         if (str == "coherentC") coherent_c = true;
         if (str == "sharedA")   shared_a = true;
         if (str == "sharedB")   shared_b = true;
+        if (str == "zeroBeta")  zero_beta = true;
         if (str == "testing")   testing = true;
         if (str == "times")     times = true;
         ++arg;
@@ -94,11 +96,20 @@ void run (int argc, char** argv)
         alpha_c_64f = 2.71828;
         alpha_r_32i = 2;
 
-        beta_r_32f = 3.14159;
-        beta_r_64f = 3.14159;
-        beta_c_32f = 3.14159;
-        beta_c_64f = 3.14159;
-        beta_r_32i = 3;
+        if (zero_beta) {
+            beta_r_32f = 0.0;
+            beta_r_64f = 0.0;
+            beta_c_32f = 0.0;
+            beta_c_64f = 0.0;
+            beta_r_32i = 0;
+        }
+        else {
+            beta_r_32f = 3.14159;
+            beta_r_64f = 3.14159;
+            beta_c_32f = 3.14159;
+            beta_c_64f = 3.14159;
+            beta_r_32i = 3;
+        }
     }
 
     void* alpha;

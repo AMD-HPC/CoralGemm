@@ -72,6 +72,7 @@ ROC_FLAGS  = --amdgpu-target=gfx906,gfx908,gfx90a
            [coherentC]  if in host memory, C is coherent (not cached)
            [sharedA]    one A for all devices
            [sharedB]    one B for all devices
+           [zeroBeta]   set beta to zero
            [testing]    perform a basic sanity check
            [times]      print time in microseconds in addition to GFLOPS 
 ```
