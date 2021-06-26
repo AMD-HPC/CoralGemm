@@ -241,46 +241,6 @@ void run (int argc, char** argv)
 ///     Launches the run inside a `try` block.
 ///     Caches and reports exceptions.
 ///
-///     Usage: ./gemm
-///         PRECISION_A         precision of A
-///         PRECISION_B         precision of B
-///         PRECISION_C         precision of C
-///         COMPUTE_PRECISION   precision of the computation
-///         OP_A                transposition of A
-///         OP_B                transposition of B
-///         M                   M dimension
-///         N                   N dimension
-///         K                   K dimension
-///         LDA                 leading dimension of A
-///         LDB                 leading dimension of B
-///         LDC                 leading dimension of C
-///         BATCH_COUNT         number of matrices in the batch
-///         TIME_SPAN           runtime duration in seconds
-///         [batched]           use the batched API
-///         [strided]           use the strided batched API
-///         [ex]                use the Ex API
-///         [hostA]             A in host memory
-///         [hostB]             B in host memory
-///         [hostC]             C in host memory
-///         [coherentA]         if in host memory, A is coherent (not cached)
-///         [coherentB]         if in host memory, B is coherent (not cached)
-///         [coherentC]         if in host memory, C is coherent (not cached)
-///         [sharedA]           used one shared A for all devices
-///         [sharedB]           used one shared B for all devices
-///
-///     supported precisions:
-///     - R_32F: float
-///     - R_64F: double
-///     - C_32F: float complex
-///     - C_64F: float double
-///     - R_8I:  8-bit int
-///     - R_32I: 32-bit int
-///
-///     supported ops:
-///     - OP_N: non-transposed
-///     - OP_T: transposed
-///     - OP_C: conjugate-transposed
-///
 int main(int argc, char** argv)
 {
     try {
