@@ -15,7 +15,8 @@ HIP_LIBS   = -lhipblas -lhiprand
 ROC_LIBS   = -lrocblas -lrocrand
 
 CXXFLAGS   = -O3 -std=c++11
-ROC_FLAGS  = --amdgpu-target=gfx906,gfx908
+GPU_TARGET = $(shell ${ROCM_PATH}/bin/rocminfo | grep -m 1 -o -P 'gfx.{0,4}')
+ROC_FLAGS  = --amdgpu-target=${AMDGPU_TARGET}
 
 # CUDA_PATH ?= /usr/local/cuda
 # NVCC       = ${CUDA_PATH}/bin/nvcc
