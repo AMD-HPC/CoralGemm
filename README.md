@@ -21,28 +21,17 @@
 * `cd src`
 * `make`
 
-Make sure to add `gfx90a` to the list of target architectures in the Makefile
-before compiling for MI200, i.e.:
-
-```
-ROC_FLAGS  = --amdgpu-target=gfx906,gfx908,gfx90a
-```
-
 ## Running DGEMM
 
 * 16 GB devices (Radeon VII): `./gemm R_64F R_64F R_64F R_64F OP_N OP_T 8640 8640 8640 8640 8640 8640 9 300`
 
 * 32 GB devices (MI60, MI100): `./gemm R_64F R_64F R_64F R_64F OP_N OP_T 8640 8640 8640 8640 8640 8640 18 300`
 
-* 64 GB devices (one MI200 GCD): `./gemm R_64F R_64F R_64F R_64F OP_N OP_T 8640 8640 8640 8640 8640 8640 36 300`
-
 ## Running SGEMM
 
 * 16 GB devices (Radeon VII): `./gemm R_32F R_32F R_32F R_32F OP_N OP_T 8640 8640 8640 8640 8640 8640 18 300`
 
 * 32 GB devices (MI60, MI100): `./gemm R_32F R_32F R_32F R_32F OP_N OP_T 8640 8640 8640 8640 8640 8640 36 300`
-
-* 64 GB devices (one MI200 GCD): `./gemm R_32F R_32F R_32F R_32F OP_N OP_T 8640 8640 8640 8640 8640 8640 72 300`
 
 ## Command-Line Details
 
