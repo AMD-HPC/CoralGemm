@@ -6,17 +6,17 @@ EXE = gemm
 ROCM_PATH ?= /opt/rocm
 HIPCC      = ${ROCM_PATH}/bin/hipcc
 
-HIP_INC    = -I${ROCM_PATH}/include
-HIP_INC   += -I${ROCM_PATH}/include/hiprand
-ROC_INC    = -I${ROCM_PATH}/include/rocrand
+HIP_INC  = -I${ROCM_PATH}/include
+HIP_INC += -I${ROCM_PATH}/include/hiprand
+ROC_INC  = -I${ROCM_PATH}/include/rocrand
 
-HIP_LIB    = -L${ROCM_PATH}/lib
-HIP_LIBS   = -lhipblas -lhiprand
-ROC_LIBS   = -lrocblas -lrocrand
+HIP_LIB  = -L${ROCM_PATH}/lib
+HIP_LIBS = -lhipblas -lhiprand
+ROC_LIBS = -lrocblas -lrocrand
 
-CXXFLAGS   = -O3 -std=c++11
-GPU_TARGET = $(shell ${ROCM_PATH}/bin/rocminfo | grep -m 1 -o -P 'gfx.{0,4}')
-ROC_FLAGS  = --amdgpu-target=${AMDGPU_TARGET}
+CXXFLAGS      = -O3 -std=c++11
+AMDGPU_TARGET = $(shell ${ROCM_PATH}/bin/rocminfo | grep -m 1 -o -P 'gfx.{0,4}')
+ROC_FLAGS     = --amdgpu-target=${AMDGPU_TARGET}
 
 # CUDA_PATH ?= /usr/local/cuda
 # NVCC       = ${CUDA_PATH}/bin/nvcc
