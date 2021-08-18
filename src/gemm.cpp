@@ -8,6 +8,7 @@
 #include "DeviceBatchArray.h"
 #include "DeviceBatchedGemm.h"
 
+#include <unistd.h>
 #include <iostream>
 
 //------------------------------------------------------------------------------
@@ -43,6 +44,7 @@ void run (int argc, char** argv)
     bool zero_beta = false;
     bool testing = false;
     bool times = false;
+    bool hostname = false;
 
     int arg = 15;
     while (arg < argc) {
@@ -61,6 +63,7 @@ void run (int argc, char** argv)
         if (str == "zeroBeta")  zero_beta = true;
         if (str == "testing")   testing = true;
         if (str == "times")     times = true;
+        if (str == "hostname")  hostname = true;
         ++arg;
     }
 
@@ -174,13 +177,15 @@ void run (int argc, char** argv)
     }
 
     // Print column labels.
-    for (int dev = 0; dev < dev_gemms.size(); ++dev)
-        printf(" device_%d_[GFLOPS]", dev);
-    printf(" timestamp_[sec]");
-    if (times)
+    if (time_span > 0.0) {
         for (int dev = 0; dev < dev_gemms.size(); ++dev)
-            printf(" device_%d_[us]", dev);
-    printf("\n");
+            printf(" device_%d_[GFLOPS]", dev);
+        printf(" timestamp_[sec]");
+        if (times)
+            for (int dev = 0; dev < dev_gemms.size(); ++dev)
+                printf(" device_%d_[us]", dev);
+        printf("\n");
+    }
 
     int count = 0;
     double timestamp;
@@ -225,6 +230,13 @@ void run (int argc, char** argv)
                     printf("%14.0lf", time_in_sec[dev]*1e6);
                 }
             }
+        }
+
+        if (count > 0 && hostname) {
+            int const max_host_name = 64;
+            char hostname[max_host_name];
+            gethostname(hostname, max_host_name);
+            printf("\t%s", hostname);
         }
 
         if (count > 0)
