@@ -63,8 +63,11 @@
            [sharedB]    one B for all devices
            [zeroBeta]   set beta to zero
            [testing]    perform a basic sanity check
-           [times]      print time in microseconds in addition to GFLOPS 
+           [times]      print time in microseconds in addition to GFLOPS
+           [hostname]   print the hostname
 ```
+
+When `TIME_SPAN` is set to 0, one warmup run is done, followed by one timing run, and printing of column labels is disabled.
 
 ### Supported Precisions:
 
