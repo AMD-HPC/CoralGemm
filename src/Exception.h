@@ -21,6 +21,8 @@
 #include <cublas_v2.h>
 #include <curand.h>
 #include "hip2cuda.h"
+#include "hipblas2cublas.h"
+#include "hiprand2curand.h"
 #endif
 
 //------------------------------------------------------------------------------
@@ -222,8 +224,10 @@ private:
             "HIPBLAS_STATUS_NOT_SUPPORTED"},
             {HIPBLAS_STATUS_ARCH_MISMATCH,
             "HIPBLAS_STATUS_ARCH_MISMATCH"},
+#if !defined(__NVCC__)
             {HIPBLAS_STATUS_HANDLE_IS_NULLPTR,
             "HIPBLAS_STATUS_HANDLE_IS_NULLPTR"}
+#endif
         };
         return error_names[code];
     }
@@ -249,8 +253,10 @@ private:
             "function not implemented"},
             {HIPBLAS_STATUS_ARCH_MISMATCH,
             ""},
+#if !defined(__NVCC__)
             {HIPBLAS_STATUS_HANDLE_IS_NULLPTR,
             "hipBLAS handle is null pointer"}
+#endif
         };
         return error_strings[code];
     }
@@ -325,8 +331,10 @@ private:
             "HIPRAND_STATUS_ARCH_MISMATCH"},
             {HIPRAND_STATUS_INTERNAL_ERROR,
             "HIPRAND_STATUS_INTERNAL_ERROR"},
+#if !defined(__NVCC__)
             {HIPRAND_STATUS_NOT_IMPLEMENTED,
             "HIPRAND_STATUS_NOT_IMPLEMENTED"}
+#endif
         };
         return error_names[code];
     }
@@ -363,8 +371,10 @@ private:
             "Architecture mismatch, GPU does not support requested feature"},
             {HIPRAND_STATUS_INTERNAL_ERROR,
             "Internal library error"},
+#if !defined(__NVCC__)
             {HIPRAND_STATUS_NOT_IMPLEMENTED,
             "Feature not implemented yet"}
+#endif
         };
         return error_strings[code];
     }

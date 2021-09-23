@@ -8,8 +8,9 @@
 #include "DeviceBatchArray.h"
 #include "DeviceBatchedGemm.h"
 
-#include <unistd.h>
+#include <chrono>
 #include <iostream>
+#include <unistd.h>
 
 //------------------------------------------------------------------------------
 /// \brief

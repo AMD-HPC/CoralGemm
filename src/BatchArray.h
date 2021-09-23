@@ -11,6 +11,37 @@
 #include "Exception.h"
 #include "hiprandpp.h"
 
+// Kernels defined as global functions for NVCC,
+// which does not support static device members.
+#if defined(__NVCC__)
+    template <typename T>
+    static __global__ void generateConstKernel(
+        int m, int n, T** d_array, int lda, double val)
+    {
+        T value = (T)val;
+        T* A = d_array[blockIdx.y];
+        int i = blockIdx.x*blockDim.x + threadIdx.x;
+        for (int j = 0; j < n; ++j) {
+            if (i < m)
+                A[i + j*lda] = value;
+        }
+    }
+
+    template <typename T>
+    static __global__ void validateConstKernel(
+        int m, int n, T** d_array, int lda, double val)
+    {
+        // T value = (T)val;
+        // T* A = d_array[blockIdx.y];
+        // int i = blockIdx.x*blockDim.x + threadIdx.x;
+        // for (int j = 0; j < n; ++j) {
+        //     if (i < m) {
+        //         assert(A[i + j*lda] == value);
+        //     }
+        // }
+    }
+#endif
+
 //------------------------------------------------------------------------------
 /// \brief
 ///     Precision-templated class for represents an array of matrices
@@ -81,6 +112,7 @@ public:
     }
 
 private:
+#if defined(__HIPCC__)
     /// The kernel for populating the batch with a specific value.
     static __global__ void generateConstKernel(
         int m, int n, T** d_array, int lda, double val)
@@ -106,6 +138,7 @@ private:
                 assert(A[i + j*lda] == value);
         }
     }
+#endif
 
 protected:
     T* data_;     ///< the pointer to the memory occupied by the batch

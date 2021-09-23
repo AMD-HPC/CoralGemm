@@ -8,8 +8,6 @@
 #include "HostBatchArray.h"
 #include "DeviceBatchArray.h"
 
-#include <hip/hip_bfloat16.h>
-
 //------------------------------------------------------------------------------
 /// \brief
 ///     Creates either a HostBatchArray or a DeviceBatchArray.

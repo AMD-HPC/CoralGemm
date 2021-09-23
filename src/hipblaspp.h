@@ -9,7 +9,9 @@
 
 #include "Exception.h"
 
-#if defined(__HIPCC__) || defined(__HIP_PLATFORM__)
+#include <complex>
+
+#if defined(__HIPCC__)
 #include <hipblas.h>
 #endif
 

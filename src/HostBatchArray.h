@@ -50,9 +50,13 @@ HostBatchArray<T>::HostBatchArray(hipblasDatatype_t type,
                                   bool coherent)
     : BatchArray<T>(type, m, n, ld, batch_count)
 {
+#if defined(__HIPCC__)
     HIP_CALL(hipHostMalloc(&this->data_, sizeof(T)*ld*n*batch_count,
                            coherent ? hipHostMallocCoherent
                                     : hipHostMallocNonCoherent));
+#else
+    HIP_CALL(hipHostMalloc(&this->data_, sizeof(T)*ld*n*batch_count));
+#endif
     HIP_CALL(hipHostMalloc(&this->h_array_, sizeof(T*)*batch_count));
     for (int i = 0; i < batch_count; ++i)
         this->h_array_[i] = this->data_+(std::size_t)ld*n*i;

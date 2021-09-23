@@ -10,9 +10,11 @@
 #if defined(__HIPCC__)
 #include <hipblas.h>
 #include <hiprand.h>
+#include <hip/hip_bfloat16.h>
 #elif defined(__NVCC__)
 #include <cublas_v2.h>
 #include <curand.h>
+#include "hipblas2cublas.h"
 #include "hiprand2curand.h"
 #endif
 

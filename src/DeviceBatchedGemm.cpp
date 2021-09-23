@@ -7,6 +7,8 @@
 ///
 #include "DeviceBatchedGemm.h"
 
+#include <algorithm>
+
 //------------------------------------------------------------------------------
 /// \brief
 ///     Creates a DeviceBatchedGemm object.

@@ -45,21 +45,25 @@ public:
     {
         static std::map<std::string, hipblasDatatype_t> types {
             {"R_16F", HIPBLAS_R_16F}, // 16 bit floating point, real
+            {"R_16B", HIPBLAS_R_16B}, // 16 bit bfloat, real
             {"R_32F", HIPBLAS_R_32F}, // 32 bit floating point, real
             {"R_64F", HIPBLAS_R_64F}, // 64 bit floating point, real
-            {"C_16F", HIPBLAS_C_16F}, // 16 bit floating point, complex
-            {"C_32F", HIPBLAS_C_32F}, // 32 bit floating point, complex
-            {"C_64F", HIPBLAS_C_64F}, // 64 bit floating point, complex
             {"R_8I",  HIPBLAS_R_8I},  //  8 bit signed integer, real
             {"R_8U",  HIPBLAS_R_8U},  //  8 bit unsigned integer, real
             {"R_32I", HIPBLAS_R_32I}, // 32 bit signed integer, real
+#if !defined(__NVCC__)
             {"R_32U", HIPBLAS_R_32U}, // 32 bit unsigned integer, real
+#endif
+            {"C_16F", HIPBLAS_C_16F}, // 16 bit floating point, complex
+            {"C_16B", HIPBLAS_C_16B}, // 16 bit bfloat, complex
+            {"C_32F", HIPBLAS_C_32F}, // 32 bit floating point, complex
+            {"C_64F", HIPBLAS_C_64F}, // 64 bit floating point, complex
             {"C_8I",  HIPBLAS_C_8I},  //  8 bit signed integer, complex
             {"C_8U",  HIPBLAS_C_8U},  //  8 bit unsigned integer, complex
             {"C_32I", HIPBLAS_C_32I}, // 32 bit signed integer, complex
+#if !defined(__NVCC__)
             {"C_32U", HIPBLAS_C_32U}, // 32 bit unsigned integer, complex
-            {"R_16B", HIPBLAS_R_16B}, // 16 bit bfloat, real
-            {"C_16B", HIPBLAS_C_16B}, // 16 bit bfloat, complex
+#endif
         };
         return types[type];
     }
@@ -73,22 +77,26 @@ public:
     {
         switch (type) {
             case HIPBLAS_R_16F:
+            case HIPBLAS_R_16B:
             case HIPBLAS_R_32F:
             case HIPBLAS_R_64F:
             case HIPBLAS_R_8I:
             case HIPBLAS_R_8U:
             case HIPBLAS_R_32I:
+#if !defined(__NVCC__)
             case HIPBLAS_R_32U:
-            case HIPBLAS_R_16B:
+#endif
                 return 2.0*m*n*k;
             case HIPBLAS_C_16F:
+            case HIPBLAS_C_16B:
             case HIPBLAS_C_32F:
             case HIPBLAS_C_64F:
             case HIPBLAS_C_8I:
             case HIPBLAS_C_8U:
             case HIPBLAS_C_32I:
+#if !defined(__NVCC__)
             case HIPBLAS_C_32U:
-            case HIPBLAS_C_16B:
+#endif
                 return 8.0*m*n*k;
             default:
                 ERROR("unsupported data type");
