@@ -83,7 +83,7 @@ inline
 void generateUniform(
     hiprandGenerator_t generator, __half* A, std::size_t len)
 {
-    ERROR("Random initialization of R_16F not supported.");
+    HIPRAND_CALL(hiprandGenerateUniformHalf(generator, A, len));
 }
 
 /// Generate uniform (hip_bfloat16).
