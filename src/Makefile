@@ -28,13 +28,13 @@ INC = $(HIP_INC)
 LIB = $(HIP_LIB) $(ROC_LIBS)
 
 rocm: $(OBJ)
-	$(HIPCC) $(CXXFLAGS) $(INC) $(LIB) $(OBJ) -o $(EXE)
+	$(HIPCC) $(CXXFLAGS) $(INC) $(OBJ) $(LIB) -o $(EXE)
 
 .cpp.o:
 	$(HIPCC) $(CXXFLAGS) $(INC) -c $< -o $@
 
 cuda:
-	$(NVCC) $(CUDA_FLAGS) $(CUDA_LIB) $(SRC) -o $(EXE)
+	$(NVCC) $(CUDA_FLAGS) $(SRC) $(CUDA_LIB) -o $(EXE)
 
 clean:
 	rm -rf $(OBJ) $(EXE) core.*
