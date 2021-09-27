@@ -62,7 +62,7 @@ inline
 void generateUniform(
     hiprandGenerator_t generator, int8_t* A, std::size_t len)
 {
-#if defined(__NVCC__) && !defined(__HIP_PLATFORM__)
+#if defined(__NVCC__)
     ASSERT(len%4 == 0);
     HIPRAND_CALL(hiprandGenerate(generator, (unsigned int*)A, len/4));
 #else
