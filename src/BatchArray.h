@@ -23,7 +23,7 @@
         int i = blockIdx.x*blockDim.x + threadIdx.x;
         for (int j = 0; j < n; ++j) {
             if (i < m)
-                A[i + j*lda] = value;
+                A[std::size_t(lda)*j + i] = value;
         }
     }
 
@@ -36,7 +36,7 @@
         // int i = blockIdx.x*blockDim.x + threadIdx.x;
         // for (int j = 0; j < n; ++j) {
         //     if (i < m) {
-        //         assert(A[i + j*lda] == value);
+        //         assert(A[std::size_t(lda)*j + i] == value);
         //     }
         // }
     }
@@ -122,7 +122,7 @@ private:
         int i = blockIdx.x*blockDim.x + threadIdx.x;
         for (int j = 0; j < n; ++j) {
             if (i < m)
-                A[i + j*lda] = value;
+                A[std::size_t(lda)*j + i] = value;
         }
     }
 
@@ -135,7 +135,7 @@ private:
         int i = blockIdx.x*blockDim.x + threadIdx.x;
         for (int j = 0; j < n; ++j) {
             if (i < m)
-                assert(A[i + j*lda] == value);
+                assert(A[std::size_t(lda)*j + i] == value);
         }
     }
 #endif
