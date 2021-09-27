@@ -71,6 +71,8 @@ When `TIME_SPAN` is set to 0, one warmup run is done, followed by one timing run
 
 ### Supported Precisions:
 
+* `R_16B`: bfloat "Brain-float"
+* `R_16F`: 16 bit float
 * `R_32F`: float
 * `R_64F`: double
 * `C_32F`: float complex
