@@ -37,4 +37,4 @@ cuda:
 	$(NVCC) $(CUDA_FLAGS) $(CUDA_LIB) $(SRC) -o $(EXE)
 
 clean:
-	rm -rf $(OBJ) $(EXE)
+	rm -rf $(OBJ) $(EXE) core.*
