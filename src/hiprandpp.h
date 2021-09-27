@@ -10,6 +10,7 @@
 #include "Exception.h"
 
 #include <complex>
+#include <limits>
 
 #if defined(__HIPCC__)
 #include <hiprand.h>
@@ -23,6 +24,31 @@
 /// C++ wrappers for hipRAND
 namespace hiprand {
 
+//------------------------------------------------------------------------------
+template <typename T>
+__global__
+void int2float_kernel(std::size_t len, unsigned int* src, T* dst)
+{
+    std::size_t pos = std::size_t(blockIdx.x)*blockDim.x + threadIdx.x;
+    if (pos < len) {
+        float uint32_val = float(src[pos]);
+        float uint32_max = float(std::numeric_limits<unsigned int>::max());
+        float scaled_val = uint32_val/uint32_max;
+        dst[pos] = T(scaled_val);
+    }
+}
+
+//------------------------------------------------------------------------------
+template <typename T>
+inline
+void int2float(std::size_t len, unsigned int* src, T* dst)
+{
+    constexpr int block_size = 256;
+    int num_blocks = len%block_size == 0 ? len/block_size : len/block_size + 1;
+    int2float_kernel<T><<<dim3(num_blocks), dim3(block_size)>>>(len, src, dst);
+}
+
+//------------------------------------------------------------------------------
 /// Generate uniform (float).
 inline
 void generateUniform(
@@ -62,11 +88,11 @@ inline
 void generateUniform(
     hiprandGenerator_t generator, int8_t* A, std::size_t len)
 {
-#if defined(__NVCC__)
+#if defined(__HIPCC__)
+    HIPRAND_CALL(hiprandGenerateChar(generator, (unsigned char*)A, len));
+#else
     ASSERT(len%4 == 0);
     HIPRAND_CALL(hiprandGenerate(generator, (unsigned int*)A, len/4));
-#else
-    HIPRAND_CALL(hiprandGenerateChar(generator, (unsigned char*)A, len));
 #endif
 }
 
@@ -83,7 +109,15 @@ inline
 void generateUniform(
     hiprandGenerator_t generator, __half* A, std::size_t len)
 {
+#if defined(__HIPCC__)
     HIPRAND_CALL(hiprandGenerateUniformHalf(generator, A, len));
+#else
+    unsigned int* uint32_A;
+    HIP_CALL(hipMalloc(&uint32_A, sizeof(unsigned int)*len));
+    HIPRAND_CALL(hiprandGenerate(generator, uint32_A, len));
+    int2float(len, uint32_A, A);
+    HIP_CALL(hipFree(uint32_A));
+#endif
 }
 
 /// Generate uniform (hip_bfloat16).
@@ -91,7 +125,11 @@ inline
 void generateUniform(
     hiprandGenerator_t generator, hip_bfloat16* A, std::size_t len)
 {
-    ERROR("Random initialization of R_16B not supported.");
+    unsigned int* uint32_A;
+    HIP_CALL(hipMalloc(&uint32_A, sizeof(unsigned int)*len));
+    HIPRAND_CALL(hiprandGenerate(generator, uint32_A, len));
+    int2float(len, uint32_A, A);
+    HIP_CALL(hipFree(uint32_A));
 }
 
 } // namespace hiprand
