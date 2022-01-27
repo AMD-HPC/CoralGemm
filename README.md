@@ -21,17 +21,30 @@
 * `cd src`
 * `make`
 
-## Running DGEMM
+## Common Cases
+
+### DGEMM
 
 * 16 GB devices (Radeon VII): `./gemm R_64F R_64F R_64F R_64F OP_N OP_T 8640 8640 8640 8640 8640 8640 9 300`
-
 * 32 GB devices (MI60, MI100): `./gemm R_64F R_64F R_64F R_64F OP_N OP_T 8640 8640 8640 8640 8640 8640 18 300`
+* 64 GB devices (MI200 series): `./gemm R_64F R_64F R_64F R_64F OP_N OP_T 8640 8640 8640 8640 8640 8640 36 300`
 
-## Running SGEMM
+### SGEMM
 
 * 16 GB devices (Radeon VII): `./gemm R_32F R_32F R_32F R_32F OP_N OP_T 8640 8640 8640 8640 8640 8640 18 300`
-
 * 32 GB devices (MI60, MI100): `./gemm R_32F R_32F R_32F R_32F OP_N OP_T 8640 8640 8640 8640 8640 8640 36 300`
+* 64 GB devices (MI200 series): `./gemm R_32F R_32F R_32F R_32F OP_N OP_T 8640 8640 8640 8640 8640 8640 72 300`
+
+### Mixed-Precision
+
+Mixed-precision GEMMs are provided by the Ex API.\
+Supply the "ex" command line option to use the Ex API.
+
+To run **half-precision (FP16)** GEMM with accumulation to FP32 on the MI200 series devices call, e.g.:\
+`./gemm R_16F R_16F R_32F R_32F OP_N OP_T 8640 8640 8640 8640 8640 8640 50 300 ex`
+
+To run **bfloat16 (BF16)** GEMM with accumulation to FP32 on the MI200 series devices call, e.g.:\
+`./gemm R_16B R_16B R_32F R_32F OP_N OP_T 8640 8640 8640 8640 8640 8640 50 300 ex`
 
 ## Command-Line Details
 
@@ -71,8 +84,8 @@ When `TIME_SPAN` is set to 0, one warmup run is done, followed by one timing run
 
 ### Supported Precisions:
 
-* `R_16B`: bfloat "Brain-float"
-* `R_16F`: 16 bit float
+* `R_16B`: BF16
+* `R_16F`: FP16
 * `R_32F`: float
 * `R_64F`: double
 * `C_32F`: float complex
