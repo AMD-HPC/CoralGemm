@@ -25,14 +25,11 @@ NVCC       = ${CUDA_PATH}/bin/nvcc
 CUDA_LIB   = -lcublas -lcurand
 CUDA_FLAGS = -x cu --expt-relaxed-constexpr
 
-INC = $(HIP_INC)
-LIB = $(HIP_LIB) $(ROC_LIBS)
-
 rocm: $(OBJ)
-	$(HIPCC) $(CXXFLAGS) $(INC) $(OBJ) $(LIB) -o $(EXE)
+	$(HIPCC) $(CXXFLAGS) $(HIP_INC) $(OBJ) $(HIP_LIB) -o $(EXE)
 
 .cpp.o:
-	$(HIPCC) $(CXXFLAGS) $(INC) -c $< -o $@
+	$(HIPCC) $(CXXFLAGS) $(HIP_INC) -c $< -o $@
 
 cuda:
 	$(NVCC) $(CUDA_FLAGS) $(SRC) $(CUDA_LIB) -o $(EXE)
