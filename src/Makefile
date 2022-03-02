@@ -14,10 +14,11 @@ HIP_LIB  = -L${ROCM_PATH}/lib
 HIP_LIB += -lhipblas -lhiprand
 HIP_LIB += -lrocblas -lrocrand
 
-CXXFLAGS       = -O3 -std=c++11
 AMDGPU_TARGET ?= $(shell ${ROCM_PATH}/bin/rocminfo | grep -m 1 -o -P 'gfx.{0,4}')
 AMDGPU_TARGET := $(if $(AMDGPU_TARGET),$(AMDGPU_TARGET),gfx906,gfx908,gfx90a)
-CXXFLAGS      += --amdgpu-target=${AMDGPU_TARGET}
+
+CXXFLAGS  = -O3 -std=c++11
+CXXFLAGS += --amdgpu-target=${AMDGPU_TARGET}
 
 CUDA_PATH ?= /usr/local/cuda
 NVCC       = ${CUDA_PATH}/bin/nvcc
