@@ -46,6 +46,7 @@ void run (int argc, char** argv)
     bool testing = false;
     bool times = false;
     bool hostname = false;
+    bool threaded = false;
 
     int arg = 15;
     while (arg < argc) {
@@ -65,6 +66,9 @@ void run (int argc, char** argv)
         if (str == "testing")   testing = true;
         if (str == "times")     times = true;
         if (str == "hostname")  hostname = true;
+#if _OPENMP
+        if (str == "threaded")  threaded = true;
+#endif
         ++arg;
     }
 
@@ -193,6 +197,7 @@ void run (int argc, char** argv)
     auto beginning = std::chrono::high_resolution_clock::now();
     do {
         // Run on all devices.
+        #pragma omp parallel for num_threads(dev_gemms.size()) if(threaded)
         for (int dev = 0; dev < dev_gemms.size(); ++dev) {
             dev_gemms[dev]->run(mode);
         }
