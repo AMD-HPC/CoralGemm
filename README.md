@@ -78,6 +78,7 @@ To run **bfloat16 (BF16)** GEMM with accumulation to FP32 on the MI200 series de
            [testing]    perform a basic sanity check
            [times]      print time in microseconds in addition to GFLOPS
            [hostname]   print the hostname
+           [threaded]   launch to each device from a different thread
 ```
 
 When `TIME_SPAN` is set to 0, one warmup run is done, followed by one timing run, and printing of column labels is disabled.
