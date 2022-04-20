@@ -1,7 +1,7 @@
 
-SRC = BaseBatchArray.cpp BatchedGemm.cpp DeviceBatchedGemm.cpp gemm.cpp
+SRC = BaseBatchArray.cpp BatchedGemm.cpp DeviceBatchedGemm.cpp sweep.cpp
 OBJ = $(SRC:.cpp=.o)
-EXE = gemm
+EXE = sweep
 
 ROCM_PATH ?= /opt/rocm
 HIPCC      = ${ROCM_PATH}/bin/hipcc

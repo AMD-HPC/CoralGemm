@@ -24,10 +24,7 @@
 /// \param[in] argc, argv
 ///     command line arguments
 ///
-/// \todo
-///     Implement rudimentary testing based on constant initialization.
-///
-void run (int argc, char** argv)
+void run(int argc, char** argv)
 {
     ASSERT(argc >= 15);
 
