@@ -55,7 +55,7 @@ public:
         : type_(type),
           m_(m), n_(n), ld_(ld),
           batch_count_(batch_count) {}
-    ~BaseBatchArray() {}
+    virtual ~BaseBatchArray() {}
 
     int m() const { return m_; }
     int n() const { return n_; }

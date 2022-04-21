@@ -177,7 +177,12 @@ public:
           batch_count_(batch_count),
           alpha_(alpha), beta_(beta),
           operations_(operations) {}
-    ~BatchedGemm() {}
+    virtual ~BatchedGemm()
+    {
+        delete a_;
+        delete b_;
+        delete c_;
+    }
 
     /// Populates the batch with random data.
     virtual void generateUniform() = 0;
