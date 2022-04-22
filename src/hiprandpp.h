@@ -12,10 +12,11 @@
 #include <complex>
 #include <limits>
 
-#if defined(__HIPCC__)
+#if defined(__HIP_PLATFORM_AMD__)
 #include <hiprand.h>
+#include <hip/hip_runtime.h>
 #include <hip/hip_bfloat16.h>
-#elif defined(__NVCC__)
+#elif defined(__HIP_PLATFORM_NVIDIA__)
 #include <curand.h>
 #endif
 
@@ -25,26 +26,10 @@ namespace hiprand {
 //------------------------------------------------------------------------------
 template <typename T>
 __global__
-void int2float_kernel(std::size_t len, unsigned int* src, T* dst)
-{
-    std::size_t pos = std::size_t(blockIdx.x)*blockDim.x + threadIdx.x;
-    if (pos < len) {
-        float uint32_val = float(src[pos]);
-        float uint32_max = float(std::numeric_limits<unsigned int>::max());
-        float scaled_val = uint32_val/uint32_max;
-        dst[pos] = T(scaled_val);
-    }
-}
+void int2float_kernel(std::size_t len, unsigned int* src, T* dst);
 
-//------------------------------------------------------------------------------
 template <typename T>
-inline
-void int2float(std::size_t len, unsigned int* src, T* dst)
-{
-    constexpr int block_size = 256;
-    int num_blocks = len%block_size == 0 ? len/block_size : len/block_size + 1;
-    int2float_kernel<T><<<dim3(num_blocks), dim3(block_size)>>>(len, src, dst);
-}
+void int2float(std::size_t len, unsigned int* src, T* dst);
 
 //------------------------------------------------------------------------------
 /// Generate uniform (float).
@@ -86,7 +71,7 @@ inline
 void generateUniform(
     hiprandGenerator_t generator, int8_t* A, std::size_t len)
 {
-#if defined(__HIPCC__)
+#if defined(__HIP_PLATFORM_AMD__)
     HIPRAND_CALL(hiprandGenerateChar(generator, (unsigned char*)A, len));
 #else
     ASSERT(len%4 == 0);
@@ -107,7 +92,7 @@ inline
 void generateUniform(
     hiprandGenerator_t generator, __half* A, std::size_t len)
 {
-#if defined(__HIPCC__)
+#if defined(__HIP_PLATFORM_AMD__)
     HIPRAND_CALL(hiprandGenerateUniformHalf(generator, A, len));
 #else
     unsigned int* uint32_A;

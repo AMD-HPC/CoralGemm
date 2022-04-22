@@ -11,36 +11,14 @@
 #include "Exception.h"
 #include "hiprandpp.h"
 
-// Kernels defined as global functions for NVCC,
-// which does not support static device members.
-#if defined(__NVCC__)
-    template <typename T>
-    static __global__ void generateConstKernel(
-        int m, int n, T** d_array, int lda, double val)
-    {
-        T value = (T)val;
-        T* A = d_array[blockIdx.y];
-        int i = blockIdx.x*blockDim.x + threadIdx.x;
-        for (int j = 0; j < n; ++j) {
-            if (i < m)
-                A[std::size_t(lda)*j + i] = value;
-        }
-    }
+//------------------------------------------------------------------------------
+template <typename T>
+__global__
+void generateConstKernel(int m, int n, T** d_array, int lda, double val);
 
-    template <typename T>
-    static __global__ void validateConstKernel(
-        int m, int n, T** d_array, int lda, double val)
-    {
-        // T value = (T)val;
-        // T* A = d_array[blockIdx.y];
-        // int i = blockIdx.x*blockDim.x + threadIdx.x;
-        // for (int j = 0; j < n; ++j) {
-        //     if (i < m) {
-        //         assert(A[std::size_t(lda)*j + i] == value);
-        //     }
-        // }
-    }
-#endif
+template <typename T>
+__global__
+void validateConstKernel(int m, int n, T** d_array, int lda, double val);
 
 //------------------------------------------------------------------------------
 /// \brief
@@ -88,57 +66,10 @@ public:
     }
 
     /// Populates the batch with a specific value.
-    void generateConstant(int device_id, double val) override
-    {
-        HIP_CALL(hipSetDevice(device_id));
-        int group_size = 256;
-        int groups_per_matrix =
-            m_%group_size == 0 ? m_/group_size : m_/group_size+1;
-        dim3 grid_size(groups_per_matrix, batch_count_);
-        generateConstKernel<<<grid_size, group_size>>>(
-            m_, n_, d_array_, ld_, val);
-    }
+    void generateConstant(int device_id, double val) override;
 
     /// Checks if the batch contains a specific value.
-    void validateConstant(int device_id, double val) override
-    {
-        HIP_CALL(hipSetDevice(device_id));
-        int group_size = 256;
-        int groups_per_matrix =
-            m_%group_size == 0 ? m_/group_size : m_/group_size+1;
-        dim3 grid_size(groups_per_matrix, batch_count_);
-        validateConstKernel<<<grid_size, group_size>>>(
-            m_, n_, d_array_, ld_, val);
-    }
-
-private:
-#if defined(__HIPCC__)
-    /// The kernel for populating the batch with a specific value.
-    static __global__ void generateConstKernel(
-        int m, int n, T** d_array, int lda, double val)
-    {
-        T value = (T)val;
-        T* A = d_array[blockIdx.y];
-        int i = blockIdx.x*blockDim.x + threadIdx.x;
-        for (int j = 0; j < n; ++j) {
-            if (i < m)
-                A[std::size_t(lda)*j + i] = value;
-        }
-    }
-
-    /// The kernel for validating the batch for a specific falue.
-    static __global__ void validateConstKernel(
-        int m, int n, T** d_array, int lda, double val)
-    {
-        T value = (T)val;
-        T* A = d_array[blockIdx.y];
-        int i = blockIdx.x*blockDim.x + threadIdx.x;
-        for (int j = 0; j < n; ++j) {
-            if (i < m)
-                assert(A[std::size_t(lda)*j + i] == value);
-        }
-    }
-#endif
+    void validateConstant(int device_id, double val) override;
 
 protected:
     T* data_;     ///< the pointer to the memory occupied by the batch

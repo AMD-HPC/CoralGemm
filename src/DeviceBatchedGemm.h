@@ -12,12 +12,12 @@
 
 #include <vector>
 
-#if defined(__HIPCC__)
+#if defined(__HIP_PLATFORM_AMD__)
 #include <hip/hip_runtime.h>
 #include <hipblas.h>
 #include <hiprand.h>
 #include "hipblaspp.h"
-#elif defined(__NVCC__)
+#elif defined(__HIP_PLATFORM_NVIDIA__)
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
 #include <curand.h>

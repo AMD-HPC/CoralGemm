@@ -12,11 +12,11 @@
 #include <map>
 #include <string>
 
-#if defined(__HIPCC__)
+#if defined(__HIP_PLATFORM_AMD__)
 #include <hip/hip_runtime.h>
 #include <hipblas.h>
 #include <hiprand.h>
-#elif defined(__NVCC__)
+#elif defined(__HIP_PLATFORM_NVIDIA__)
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
 #include <curand.h>
@@ -225,7 +225,7 @@ private:
             "HIPBLAS_STATUS_NOT_SUPPORTED"},
             {HIPBLAS_STATUS_ARCH_MISMATCH,
             "HIPBLAS_STATUS_ARCH_MISMATCH"},
-#if !defined(__NVCC__)
+#if !defined(__HIP_PLATFORM_NVIDIA__)
             {HIPBLAS_STATUS_HANDLE_IS_NULLPTR,
             "HIPBLAS_STATUS_HANDLE_IS_NULLPTR"}
 #endif
@@ -254,7 +254,7 @@ private:
             "function not implemented"},
             {HIPBLAS_STATUS_ARCH_MISMATCH,
             ""},
-#if !defined(__NVCC__)
+#if !defined(__HIP_PLATFORM_NVIDIA__)
             {HIPBLAS_STATUS_HANDLE_IS_NULLPTR,
             "hipBLAS handle is null pointer"}
 #endif
@@ -332,7 +332,7 @@ private:
             "HIPRAND_STATUS_ARCH_MISMATCH"},
             {HIPRAND_STATUS_INTERNAL_ERROR,
             "HIPRAND_STATUS_INTERNAL_ERROR"},
-#if !defined(__NVCC__)
+#if !defined(__HIP_PLATFORM_NVIDIA__)
             {HIPRAND_STATUS_NOT_IMPLEMENTED,
             "HIPRAND_STATUS_NOT_IMPLEMENTED"}
 #endif
@@ -372,7 +372,7 @@ private:
             "Architecture mismatch, GPU does not support requested feature"},
             {HIPRAND_STATUS_INTERNAL_ERROR,
             "Internal library error"},
-#if !defined(__NVCC__)
+#if !defined(__HIP_PLATFORM_NVIDIA__)
             {HIPRAND_STATUS_NOT_IMPLEMENTED,
             "Feature not implemented yet"}
 #endif

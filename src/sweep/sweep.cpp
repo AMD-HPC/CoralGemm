@@ -5,8 +5,8 @@
 /// \author     Jakub Kurzak
 /// \copyright  Advanced Micro Devices, Inc.
 ///
-#include "DeviceBatchArray.h"
-#include "DeviceBatchedGemm.h"
+#include "../DeviceBatchArray.h"
+#include "../DeviceBatchedGemm.h"
 
 #include <algorithm>
 #include <chrono>
@@ -146,8 +146,10 @@ void sweep(std::string type_a_name,
     double timestamp;
     auto beginning = std::chrono::high_resolution_clock::now();
     do {
-        int n = rand()%max_n;
-        int k = rand()%max_k;
+        int n;
+        int k;
+        do { n = rand()%max_n; } while (n == 0);
+        do { k = rand()%max_k; } while (k == 0);
         int m = n;
 
         int lda = op_a_name == "OP_N" ? m : k;
@@ -158,28 +160,30 @@ void sweep(std::string type_a_name,
         round_up(ldb, type_b_name, 128);
         round_up(ldc, type_c_name, 128);
 
-        // todo: include lda in size calculation
-        std::size_t size = 0;
-        size += type_size(type_a_name)*m*k;
-        size += type_size(type_b_name)*k*n;
-        size += type_size(type_c_name)*n*m;
+        std::size_t size_a = type_size(type_a_name)*lda;
+        std::size_t size_b = type_size(type_b_name)*ldb;
+        size_a *= op_a_name == "OP_N" ? k : m;
+        size_b *= op_b_name == "OP_N" ? n : k;
+        std::size_t size_c = type_size(type_c_name)*ldc*n;
+        std::size_t size = size_a+size_b+size_c;
 
         int batch_count = max_size/size;
         batch_count = std::min(batch_count, max_count);
 
-        step(type_a_name,
-             type_b_name,
-             type_c_name,
-             compute_type_name,
-             op_a_name,
-             op_b_name,
-             mode,
-             m, n, k,
-             lda, ldb, ldc,
-             batch_count,
-             n_array,
-             k_array,
-             gflops_array);
+        if (batch_count > 0)
+            step(type_a_name,
+                 type_b_name,
+                 type_c_name,
+                 compute_type_name,
+                 op_a_name,
+                 op_b_name,
+                 mode,
+                 m, n, k,
+                 lda, ldb, ldc,
+                 batch_count,
+                 n_array,
+                 k_array,
+                 gflops_array);
 
         timestamp = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::high_resolution_clock::now()-beginning).count();

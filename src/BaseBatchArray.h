@@ -7,11 +7,11 @@
 ///
 #pragma once
 
-#if defined(__HIPCC__)
+#if defined(__HIP_PLATFORM_AMD__)
 #include <hipblas.h>
 #include <hiprand.h>
 #include <hip/hip_bfloat16.h>
-#elif defined(__NVCC__)
+#elif defined(__HIP_PLATFORM_NVIDIA__)
 #include <cublas_v2.h>
 #include <curand.h>
 #include "hipblas2cublas.h"
