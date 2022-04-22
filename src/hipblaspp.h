@@ -13,9 +13,7 @@
 
 #if defined(__HIPCC__)
 #include <hipblas.h>
-#endif
-
-#if defined(__NVCC__)
+#elif defined(__NVCC__)
 #include <cublas_v2.h>
 #endif
 

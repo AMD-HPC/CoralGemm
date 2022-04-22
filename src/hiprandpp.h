@@ -15,9 +15,7 @@
 #if defined(__HIPCC__)
 #include <hiprand.h>
 #include <hip/hip_bfloat16.h>
-#endif
-
-#if defined(__NVCC__)
+#elif defined(__NVCC__)
 #include <curand.h>
 #endif
 
