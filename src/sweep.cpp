@@ -13,6 +13,8 @@
 #include <iostream>
 #include <unistd.h>
 
+#include <mpi.h>
+
 //------------------------------------------------------------------------------
 /// \brief
 ///
@@ -35,26 +37,27 @@ std::size_t type_size(std::string type_name)
 ///
 void round_up(int &n, std::string type_name, int ceil_bytes)
 {
-    printf("\t%d", n);
     int ceil_elements = ceil_bytes/type_size(type_name);
     if (n%ceil_elements != 0)
         n = n/ceil_elements*ceil_elements + ceil_elements;
-    printf("\t%d\n", n);
 }
 
 //------------------------------------------------------------------------------
 /// \brief
 ///
-void run(std::string type_a_name,
-         std::string type_b_name,
-         std::string type_c_name,
-         std::string compute_type_name,
-         std::string op_a_name,
-         std::string op_b_name,
-         BatchedGemm::Mode mode,
-         int m, int n, int k,
-         int lda, int ldb, int ldc,
-         int batch_count)
+void step(std::string type_a_name,
+          std::string type_b_name,
+          std::string type_c_name,
+          std::string compute_type_name,
+          std::string op_a_name,
+          std::string op_b_name,
+          BatchedGemm::Mode mode,
+          int m, int n, int k,
+          int lda, int ldb, int ldc,
+          int batch_count,
+          std::vector<int> &n_array,
+          std::vector<int> &k_array,
+          std::vector<double> &gflops_array)
 {
     float                alpha_r_32f;
     double               alpha_r_64f;
@@ -114,8 +117,11 @@ void run(std::string type_a_name,
     dev_gemms[0]->generateUniform();
     dev_gemms[0]->run(mode);
     double gflops = dev_gemms[0]->getGflops(mode).first;
-    printf("%d,%d,%lf\n", m, k, gflops);
     delete dev_gemms[0];
+
+    n_array.push_back(n);
+    k_array.push_back(k);
+    gflops_array.push_back(gflops);
 }
 
 //------------------------------------------------------------------------------
@@ -132,7 +138,10 @@ void sweep(std::string type_a_name,
            int max_k,
            std::size_t max_size,
            int max_count,
-           double duration)
+           double duration,
+           std::vector<int> &n_array,
+           std::vector<int> &k_array,
+           std::vector<double> &gflops_array)
 {
     double timestamp;
     auto beginning = std::chrono::high_resolution_clock::now();
@@ -149,6 +158,7 @@ void sweep(std::string type_a_name,
         round_up(ldb, type_b_name, 128);
         round_up(ldc, type_c_name, 128);
 
+        // todo: include lda in size calculation
         std::size_t size = 0;
         size += type_size(type_a_name)*m*k;
         size += type_size(type_b_name)*k*n;
@@ -157,21 +167,77 @@ void sweep(std::string type_a_name,
         int batch_count = max_size/size;
         batch_count = std::min(batch_count, max_count);
 
-        run(type_a_name,
-            type_b_name,
-            type_c_name,
-            compute_type_name,
-            op_a_name,
-            op_b_name,
-            mode,
-            m, n, k,
-            lda, ldb, ldc,
-            batch_count);
+        step(type_a_name,
+             type_b_name,
+             type_c_name,
+             compute_type_name,
+             op_a_name,
+             op_b_name,
+             mode,
+             m, n, k,
+             lda, ldb, ldc,
+             batch_count,
+             n_array,
+             k_array,
+             gflops_array);
 
         timestamp = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::high_resolution_clock::now()-beginning).count();
     }
     while (timestamp*1e-6 <= duration);
+}
+
+//------------------------------------------------------------------------------
+/// \brief
+///
+void job(std::string type_a_name,
+         std::string type_b_name,
+         std::string type_c_name,
+         std::string compute_type_name,
+         std::string op_a_name,
+         std::string op_b_name,
+         BatchedGemm::Mode mode,
+         int max_n,
+         int max_k,
+         std::size_t max_size,
+         int max_count,
+         double duration)
+{
+    int mpi_rank;
+    int mpi_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    std::vector<int> n_array;
+    std::vector<int> k_array;
+    std::vector<double> gflops_array;
+
+    srand(mpi_rank);
+    sweep(type_a_name,
+          type_b_name,
+          type_c_name,
+          compute_type_name,
+          op_a_name,
+          op_b_name,
+          mode,
+          max_n,
+          max_k,
+          max_size,
+          max_count,
+          duration,
+          n_array,
+          k_array,
+          gflops_array);
+
+    for (int rank = 0; rank < mpi_size; ++rank) {
+        if (rank == mpi_rank) {
+            for (int i = 0; i < n_array.size(); ++i) {
+                printf("%d,%d,%lf\n", n_array[i], k_array[i], gflops_array[i]);
+            }
+        }
+        fflush(stdout);
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -227,23 +293,24 @@ int main(int argc, char** argv)
         else    mode = BatchedGemm::Mode::Standard;
     }
 
+    MPI_Init(&argc, &argv);
     try {
-        sweep(std::string(argv[1]),
-              std::string(argv[2]),
-              std::string(argv[3]),
-              std::string(argv[4]),
-              std::string(argv[5]),
-              std::string(argv[6]),
-              mode,
-              std::atoi(argv[7]),
-              std::atoi(argv[8]),
-              std::atol(argv[9]),
-              std::atoi(argv[10]),
-              std::atoi(argv[11]));
+        job(std::string(argv[1]),
+            std::string(argv[2]),
+            std::string(argv[3]),
+            std::string(argv[4]),
+            std::string(argv[5]),
+            std::string(argv[6]),
+            mode,
+            std::atoi(argv[7]),
+            std::atoi(argv[8]),
+            std::atol(argv[9]),
+            std::atoi(argv[10]),
+            std::atoi(argv[11]));
     }
     catch (Exception& e) {
         std::cerr << std::endl << e.what() << std::endl << std::endl;
         exit(EXIT_FAILURE);
     }
-    exit(EXIT_SUCCESS);
+    MPI_Finalize();
 }
