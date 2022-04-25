@@ -148,8 +148,14 @@ void sweep(std::string type_a_name,
     do {
         int n;
         int k;
-        do { n = rand()%max_n; } while (n == 0);
-        do { k = rand()%max_k; } while (k == 0);
+        if (compute_type_name != "R_32I") {
+            do { n = rand()%max_n; } while (n == 0);
+            do { k = rand()%max_k; } while (k == 0);
+        }
+        else {
+            do { n = rand()%max_n; } while (n == 0 || n%4 != 0);
+            do { k = rand()%max_k; } while (k == 0 || k%4 != 0);
+        }
         int m = n;
 
         int lda = op_a_name == "OP_N" ? m : k;
