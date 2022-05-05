@@ -14,8 +14,6 @@
 * [rocRAND][]
 * hipRAND
 
-`sudo apt install rocm-dkms rocm-libs` to install all prerequisites.
-
 ## Installing
 
 * `cd src`
