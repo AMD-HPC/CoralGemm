@@ -13,7 +13,7 @@ HIP_INC += -I${ROCM_PATH}/include/rocrand
 HIP_LIB  = -L${ROCM_PATH}/lib
 HIP_LIB += -lhipblas -lhiprand
 HIP_LIB += -lrocblas -lrocrand
-HIP_LIB += -lamdhip64
+HIP_LIB += -lamdhip64 -fopenmp
 
 AMDGPU_TARGET ?= $(shell ${ROCM_PATH}/bin/rocminfo | grep -m 1 -o -P 'gfx.{0,4}')
 AMDGPU_TARGET := $(if $(AMDGPU_TARGET),$(AMDGPU_TARGET),gfx906,gfx908,gfx90a)
