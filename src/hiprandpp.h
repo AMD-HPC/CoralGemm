@@ -13,7 +13,7 @@
 #include <limits>
 
 #if defined(__HIP_PLATFORM_AMD__)
-#include <hiprand.h>
+#include <hiprand/hiprand.h>
 #include <hip/hip_runtime.h>
 #include <hip/hip_bfloat16.h>
 #elif defined(__HIP_PLATFORM_NVIDIA__)

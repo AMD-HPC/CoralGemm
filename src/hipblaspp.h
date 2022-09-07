@@ -12,7 +12,7 @@
 #include <complex>
 
 #if defined(__HIP_PLATFORM_AMD__)
-#include <hipblas.h>
+#include <hipblas/hipblas.h>
 #elif defined(__HIP_PLATFORM_NVIDIA__)
 #include <cublas_v2.h>
 #endif

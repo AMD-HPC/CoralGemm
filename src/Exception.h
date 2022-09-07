@@ -14,8 +14,8 @@
 
 #if defined(__HIP_PLATFORM_AMD__)
 #include <hip/hip_runtime.h>
-#include <hipblas.h>
-#include <hiprand.h>
+#include <hipblas/hipblas.h>
+#include <hiprand/hiprand.h>
 #elif defined(__HIP_PLATFORM_NVIDIA__)
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
