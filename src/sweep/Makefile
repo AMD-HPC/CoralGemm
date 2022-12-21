@@ -23,11 +23,11 @@ HIP_LIB += -lamdhip64
 
 MPI_LIB  = -lmpi
 
-AMDGPU_TARGET ?= $(shell ${ROCM_PATH}/bin/rocminfo | grep -m 1 -o -P 'gfx.{0,4}')
-AMDGPU_TARGET := $(if $(AMDGPU_TARGET),$(AMDGPU_TARGET),gfx906,gfx908,gfx90a)
+OFFLOAD_ARCH ?= $(shell ${ROCM_PATH}/bin/rocminfo | grep -m 1 -o -P 'gfx.{0,4}')
+OFFLOAD_ARCH := $(if $(OFFLOAD_ARCH),$(OFFLOAD_ARCH),gfx906,gfx908,gfx90a)
 
 HIPCC_FLAGS  = -fPIC
-HIPCC_FLAGS += --amdgpu-target=${AMDGPU_TARGET}
+HIPCC_FLAGS += --offload-arch=${OFFLOAD_ARCH}
 
 CXXFLAGS  = -O3 -std=c++11
 CXXFLAGS += -D__HIP_PLATFORM_AMD__
