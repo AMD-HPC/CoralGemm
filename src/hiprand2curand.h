@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /// \file
 /// \brief      hipRAND to cuRAND name replacements
-/// \date       2020-2021
+/// \date       2020-2023
 /// \author     Jakub Kurzak
 /// \copyright  Advanced Micro Devices, Inc.
 ///

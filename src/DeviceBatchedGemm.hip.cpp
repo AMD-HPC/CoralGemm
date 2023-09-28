@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /// \file
 /// \brief      implementations of DeviceBatchedGemm methods
-/// \date       2020-2021
+/// \date       2020-2023
 /// \author     Jakub Kurzak
 /// \copyright  Advanced Micro Devices, Inc.
 ///

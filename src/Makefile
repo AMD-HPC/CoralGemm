@@ -1,5 +1,5 @@
 
-SRC  = $(wildcard *.cpp)
+SRC = $(wildcard *.cpp)
 OBJ = $(SRC:.cpp=.o)
 EXE = gemm
 
