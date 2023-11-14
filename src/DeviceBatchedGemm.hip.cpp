@@ -82,17 +82,17 @@ DeviceBatchedGemm::DeviceBatchedGemm(hipblasDatatype_t compute_type,
 DeviceBatchedGemm::~DeviceBatchedGemm()
 {
     // Set the device.
-    hipSetDevice(device_id_);
+    (void)hipSetDevice(device_id_);
 
     // Destroy all the handles.
-    hiprandDestroyGenerator(hiprand_generator_);
-    hipblasDestroy(hipblas_handle_);
-    hipStreamDestroy(hip_stream_);
+    (void)hiprandDestroyGenerator(hiprand_generator_);
+    (void)hipblasDestroy(hipblas_handle_);
+    (void)hipStreamDestroy(hip_stream_);
 
     // Destroy events.
     for (int i = 0; i < batch_count_; ++i) {
-        hipEventDestroy(start[i]);
-        hipEventDestroy(stop[i]);
+        (void)hipEventDestroy(start[i]);
+        (void)hipEventDestroy(stop[i]);
     }
 }
 
@@ -112,7 +112,7 @@ DeviceBatchedGemm::~DeviceBatchedGemm()
 void DeviceBatchedGemm::run(Mode mode)
 {
     // Set the device.
-    hipSetDevice(device_id_);
+    HIP_CALL(hipSetDevice(device_id_));
 
     switch(mode) {
         case Mode::Standard:
@@ -328,7 +328,7 @@ void DeviceBatchedGemm::runStridedBatchedGemmEx()
 std::pair<double, double> DeviceBatchedGemm::getGflops(Mode mode)
 {
     // Set the device.
-    hipSetDevice(device_id_);
+    HIP_CALL(hipSetDevice(device_id_));
 
     double gflops;
     double time_in_sec;
@@ -337,7 +337,7 @@ std::pair<double, double> DeviceBatchedGemm::getGflops(Mode mode)
         std::vector<float> elapsed(batch_count_);
         HIP_CALL(hipEventSynchronize(stop[batch_count_-1]));
         for (int i = 0; i < batch_count_; ++i)
-            hipEventElapsedTime(&elapsed[i], start[i], stop[i]);
+            HIP_CALL(hipEventElapsedTime(&elapsed[i], start[i], stop[i]));
 
         std::sort(elapsed.begin(), elapsed.end(), std::greater<float>());
         double median_time = elapsed[batch_count_/2];
@@ -349,7 +349,7 @@ std::pair<double, double> DeviceBatchedGemm::getGflops(Mode mode)
         /// \todo Possibly introduce iterations.
         float elapsed;
         HIP_CALL(hipEventSynchronize(stop[0]));
-        hipEventElapsedTime(&elapsed, start[0], stop[0]);
+        HIP_CALL(hipEventElapsedTime(&elapsed, start[0], stop[0]));
         time_in_sec = elapsed/1e3;
         gflops = operations_*batch_count_/time_in_sec/1e9;
     }

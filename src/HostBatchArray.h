@@ -72,7 +72,7 @@ template <typename T>
 inline
 HostBatchArray<T>::~HostBatchArray()
 {
-    hipFree(this->d_array_);
-    hipFree(this->h_array_);
-    hipFree(this->data_);
+    (void)hipFree(this->d_array_);
+    (void)hipFree(this->h_array_);
+    (void)hipFree(this->data_);
 }

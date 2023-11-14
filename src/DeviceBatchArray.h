@@ -70,8 +70,8 @@ template <typename T>
 inline
 DeviceBatchArray<T>::~DeviceBatchArray()
 {
-    hipSetDevice(device_id_);
-    hipFree(this->d_array_);
-    hipFree(this->h_array_);
-    hipFree(this->data_);
+    (void)hipSetDevice(device_id_);
+    (void)hipFree(this->d_array_);
+    (void)hipFree(this->h_array_);
+    (void)hipFree(this->data_);
 }
