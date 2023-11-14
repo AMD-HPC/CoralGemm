@@ -14,10 +14,16 @@
 * [rocRAND][]
 * hipRAND
 
-## Installing
+## Building
 
-* `cd src`
-* `make`
+```
+git clone git@github.com:AMD-HPC/CoralGemm.git
+cd CoralGemm
+mkdir build
+cd build
+cmake ..
+make -j
+```
 
 ## Common Cases
 
