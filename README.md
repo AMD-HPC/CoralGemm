@@ -25,6 +25,13 @@ cmake ..
 make -j
 ```
 
+Need be, set `CMAKE_MODULE_PATH` and `CMAKE_PREFIX_PATH`, e.g.:
+
+```
+export CMAKE_MODULE_PATH=/opt/rocm/hip/cmake:$CMAKE_MODULE_PATH
+export CMAKE_PREFIX_PATH=/opt/rocm/lib/cmake:$CMAKE_PREFIX_PATH
+```
+
 ## Common Cases
 
 ### DGEMM
