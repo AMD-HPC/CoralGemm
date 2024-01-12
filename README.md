@@ -21,7 +21,7 @@ git clone git@github.com:AMD-HPC/CoralGemm.git
 cd CoralGemm
 mkdir build
 cd build
-cmake -D CMAKE_BUILD_TYPE=RELEASE ..
+cmake ..
 make -j
 ```
 
