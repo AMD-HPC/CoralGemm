@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /// \file
 /// \brief      main CoralGemm driver routines
-/// \date       2020-2023
+/// \date       2020-2024
 /// \author     Jakub Kurzak
 /// \copyright  Advanced Micro Devices, Inc.
 ///
@@ -43,7 +43,7 @@ void run(int argc, char** argv)
     bool testing = false;
     bool times = false;
     bool hostname = false;
-    bool threaded = false;
+    [[maybe_unused]] bool threaded = false;
 
     int arg = 15;
     while (arg < argc) {
@@ -63,9 +63,7 @@ void run(int argc, char** argv)
         if (str == "testing")   testing = true;
         if (str == "times")     times = true;
         if (str == "hostname")  hostname = true;
-#if _OPENMP
         if (str == "threaded")  threaded = true;
-#endif
         ++arg;
     }
 

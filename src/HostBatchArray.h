@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /// \file
 /// \brief      HostBatchArray class declaration and inline routines
-/// \date       2020-2023
+/// \date       2020-2024
 /// \author     Jakub Kurzak
 /// \copyright  Advanced Micro Devices, Inc.
 ///
@@ -50,7 +50,7 @@ HostBatchArray<T>::HostBatchArray(hipblasDatatype_t type,
                                   bool coherent)
     : BatchArray<T>(type, m, n, ld, batch_count)
 {
-#if defined(__HIP_PLATFORM_AMD__)
+#if defined(USE_HIP)
     HIP_CALL(hipHostMalloc(&this->data_, sizeof(T)*ld*n*batch_count,
                            coherent ? hipHostMallocCoherent
                                     : hipHostMallocNonCoherent));

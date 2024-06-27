@@ -1,7 +1,7 @@
  //------------------------------------------------------------------------------
 /// \file
 /// \brief      C++ wrappers for the hipBLAS routines used in CoralGemm
-/// \date       2020-2023
+/// \date       2020-2024
 /// \author     Jakub Kurzak
 /// \copyright  Advanced Micro Devices, Inc.
 ///
@@ -11,9 +11,9 @@
 
 #include <complex>
 
-#if defined(__HIP_PLATFORM_AMD__)
+#if defined(USE_HIP)
 #include <hipblas/hipblas.h>
-#elif defined(__HIP_PLATFORM_NVIDIA__)
+#elif defined(USE_CUDA)
 #include <cublas_v2.h>
 #endif
 

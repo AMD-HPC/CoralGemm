@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /// \file
 /// \brief      C++ wrappers for the hipRAND routines used in CoralGemm
-/// \date       2020-2023
+/// \date       2020-2024
 /// \author     Jakub Kurzak
 /// \copyright  Advanced Micro Devices, Inc.
 ///
@@ -12,11 +12,11 @@
 #include <complex>
 #include <limits>
 
-#if defined(__HIP_PLATFORM_AMD__)
+#if defined(USE_HIP)
 #include <hiprand/hiprand.h>
 #include <hip/hip_runtime.h>
 #include <hip/hip_bfloat16.h>
-#elif defined(__HIP_PLATFORM_NVIDIA__)
+#elif defined(USE_CUDA)
 #include <curand.h>
 #endif
 
@@ -71,7 +71,7 @@ inline
 void generateUniform(
     hiprandGenerator_t generator, int8_t* A, std::size_t len)
 {
-#if defined(__HIP_PLATFORM_AMD__)
+#if defined(USE_HIP)
     HIPRAND_CALL(hiprandGenerateChar(generator, (unsigned char*)A, len));
 #else
     ASSERT(len%4 == 0);
@@ -92,7 +92,7 @@ inline
 void generateUniform(
     hiprandGenerator_t generator, __half* A, std::size_t len)
 {
-#if defined(__HIP_PLATFORM_AMD__)
+#if defined(USE_HIP)
     HIPRAND_CALL(hiprandGenerateUniformHalf(generator, A, len));
 #else
     unsigned int* uint32_A;

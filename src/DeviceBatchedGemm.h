@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /// \file
 /// \brief      DeviceBatchedGemm class declaration and inline routines
-/// \date       2020-2023
+/// \date       2020-2024
 /// \author     Jakub Kurzak
 /// \copyright  Advanced Micro Devices, Inc.
 ///
@@ -12,12 +12,12 @@
 
 #include <vector>
 
-#if defined(__HIP_PLATFORM_AMD__)
+#if defined(USE_HIP)
 #include <hip/hip_runtime.h>
 #include <hipblas/hipblas.h>
 #include <hiprand/hiprand.h>
 #include "hipblaspp.h"
-#elif defined(__HIP_PLATFORM_NVIDIA__)
+#elif defined(USE_CUDA)
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
 #include <curand.h>

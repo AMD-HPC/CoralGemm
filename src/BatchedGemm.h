@@ -1,7 +1,7 @@
  //------------------------------------------------------------------------------
 /// \file
 /// \brief      BatchedGemm class declaration and inline routines
-/// \date       2020-2023
+/// \date       2020-2024
 /// \author     Jakub Kurzak
 /// \copyright  Advanced Micro Devices, Inc.
 ///
@@ -51,7 +51,7 @@ public:
             {"R_8I",  HIPBLAS_R_8I},  //  8 bit signed integer, real
             {"R_8U",  HIPBLAS_R_8U},  //  8 bit unsigned integer, real
             {"R_32I", HIPBLAS_R_32I}, // 32 bit signed integer, real
-#if !defined(__HIP_PLATFORM_NVIDIA__)
+#if !defined(USE_CUDA)
             {"R_32U", HIPBLAS_R_32U}, // 32 bit unsigned integer, real
 #endif
             {"C_16F", HIPBLAS_C_16F}, // 16 bit floating point, complex
@@ -61,7 +61,7 @@ public:
             {"C_8I",  HIPBLAS_C_8I},  //  8 bit signed integer, complex
             {"C_8U",  HIPBLAS_C_8U},  //  8 bit unsigned integer, complex
             {"C_32I", HIPBLAS_C_32I}, // 32 bit signed integer, complex
-#if !defined(__HIP_PLATFORM_NVIDIA__)
+#if !defined(USE_CUDA)
             {"C_32U", HIPBLAS_C_32U}, // 32 bit unsigned integer, complex
 #endif
         };
@@ -83,7 +83,7 @@ public:
             case HIPBLAS_R_8I:
             case HIPBLAS_R_8U:
             case HIPBLAS_R_32I:
-#if !defined(__HIP_PLATFORM_NVIDIA__)
+#if !defined(USE_CUDA)
             case HIPBLAS_R_32U:
 #endif
                 return 2.0*m*n*k;
@@ -94,7 +94,7 @@ public:
             case HIPBLAS_C_8I:
             case HIPBLAS_C_8U:
             case HIPBLAS_C_32I:
-#if !defined(__HIP_PLATFORM_NVIDIA__)
+#if !defined(USE_CUDA)
             case HIPBLAS_C_32U:
 #endif
                 return 8.0*m*n*k;

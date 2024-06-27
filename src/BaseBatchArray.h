@@ -1,17 +1,17 @@
 //------------------------------------------------------------------------------
 /// \file
 /// \brief      BaseBatchArray class declaration and inline routines
-/// \date       2020-2023
+/// \date       2020-2024
 /// \author     Jakub Kurzak
 /// \copyright  Advanced Micro Devices, Inc.
 ///
 #pragma once
 
-#if defined(__HIP_PLATFORM_AMD__)
+#if defined(USE_HIP)
 #include <hipblas/hipblas.h>
 #include <hiprand/hiprand.h>
 #include <hip/hip_bfloat16.h>
-#elif defined(__HIP_PLATFORM_NVIDIA__)
+#elif defined(USE_CUDA)
 #include <cublas_v2.h>
 #include <curand.h>
 #include "hipblas2cublas.h"

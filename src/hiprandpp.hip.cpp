@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /// \file
 /// \brief      auxiliary functions for C++ hipRAND wrappers in CoralGemm
-/// \date       2020-2023
+/// \date       2020-2024
 /// \author     Jakub Kurzak
 /// \copyright  Advanced Micro Devices, Inc.
 ///
@@ -31,6 +31,9 @@ void int2float(std::size_t len, unsigned int* src, T* dst)
     int num_blocks = len%block_size == 0 ? len/block_size : len/block_size + 1;
     int2float_kernel<T><<<dim3(num_blocks), dim3(block_size)>>>(len, src, dst);
 }
+
+template
+void int2float(std::size_t len, unsigned int* src, __half* dst);
 
 template
 void int2float(std::size_t len, unsigned int* src, hip_bfloat16* dst);
