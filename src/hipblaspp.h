@@ -12,9 +12,9 @@
 #include <complex>
 
 #if defined(USE_HIP)
-#include <hipblas/hipblas.h>
+    #include <hipblas/hipblas.h>
 #elif defined(USE_CUDA)
-#include <cublas_v2.h>
+    #include <cublas_v2.h>
 #endif
 
 /// C++ wrappers for hipBLAS

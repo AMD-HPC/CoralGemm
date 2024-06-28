@@ -13,11 +13,11 @@
 #include <limits>
 
 #if defined(USE_HIP)
-#include <hiprand/hiprand.h>
-#include <hip/hip_runtime.h>
-#include <hip/hip_bfloat16.h>
+    #include <hiprand/hiprand.h>
+    #include <hip/hip_runtime.h>
+    #include <hip/hip_bfloat16.h>
 #elif defined(USE_CUDA)
-#include <curand.h>
+    #include <curand.h>
 #endif
 
 /// C++ wrappers for hipRAND

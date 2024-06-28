@@ -13,16 +13,16 @@
 #include <string>
 
 #if defined(USE_HIP)
-#include <hip/hip_runtime.h>
-#include <hipblas/hipblas.h>
-#include <hiprand/hiprand.h>
+    #include <hip/hip_runtime.h>
+    #include <hipblas/hipblas.h>
+    #include <hiprand/hiprand.h>
 #elif defined(USE_CUDA)
-#include <cuda_runtime.h>
-#include <cublas_v2.h>
-#include <curand.h>
-#include "hip2cuda.h"
-#include "hipblas2cublas.h"
-#include "hiprand2curand.h"
+    #include <cuda_runtime.h>
+    #include <cublas_v2.h>
+    #include <curand.h>
+    #include "hip2cuda.h"
+    #include "hipblas2cublas.h"
+    #include "hiprand2curand.h"
 #endif
 
 //------------------------------------------------------------------------------

@@ -8,14 +8,14 @@
 #pragma once
 
 #if defined(USE_HIP)
-#include <hipblas/hipblas.h>
-#include <hiprand/hiprand.h>
-#include <hip/hip_bfloat16.h>
+    #include <hipblas/hipblas.h>
+    #include <hiprand/hiprand.h>
+    #include <hip/hip_bfloat16.h>
 #elif defined(USE_CUDA)
-#include <cublas_v2.h>
-#include <curand.h>
-#include "hipblas2cublas.h"
-#include "hiprand2curand.h"
+    #include <cublas_v2.h>
+    #include <curand.h>
+    #include "hipblas2cublas.h"
+    #include "hiprand2curand.h"
 #endif
 
 //------------------------------------------------------------------------------
