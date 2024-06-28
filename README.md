@@ -32,6 +32,14 @@ export CMAKE_MODULE_PATH=/opt/rocm/hip/cmake:${CMAKE_MODULE_PATH}
 export CMAKE_PREFIX_PATH=/opt/rocm/lib/cmake:${CMAKE_PREFIX_PATH}
 ```
 
+By default CoralGemm is built for AMD GPUs using ROCm.\
+However, it can also be built for NVIDIA GPUs using CUDA.\
+To do so, set `USE_HIP=OFF`, `USE_CUDA=ON`, and set `CMAKE_CUDA_ARCHITECTURES`, e.g.:
+
+```
+cmake -DUSE_HIP=OFF -DUSE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=90 ..
+```
+
 ## Common Cases
 
 ### DGEMM
