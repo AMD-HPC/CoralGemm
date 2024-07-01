@@ -34,39 +34,41 @@ if(USE_HIP AND USE_CUDA)
 #
 elseif(USE_HIP)
   enable_language(HIP)
+
   find_package(rocblas REQUIRED)
   find_package(hipblas REQUIRED)
   find_package(rocrand REQUIRED)
   find_package(hiprand REQUIRED)
 
   file(GLOB SOURCES "src/*.cpp")
-  set_source_files_properties(
-    ${SOURCES} PROPERTIES LANGUAGE HIP)
-add_executable(gemm ${SOURCES})
+  set_source_files_properties(${SOURCES} PROPERTIES LANGUAGE HIP)
 
-target_link_libraries(gemm PRIVATE
-    roc::rocblas
-    roc::rocrand
-    roc::hipblas
-    hip::hiprand)
+  add_executable(gemm ${SOURCES})
 
-target_compile_definitions(gemm PRIVATE USE_HIP)
+  target_link_libraries(gemm PRIVATE
+                        roc::rocblas
+                        roc::rocrand
+                        roc::hipblas
+                        hip::hiprand)
+
+  target_compile_definitions(gemm PRIVATE USE_HIP)
 
 # ------------------------------------------------------------------------------
 # Setup for building with CUDA (NVIDIA GPUs)
 #
 elseif(USE_CUDA)
   enable_language(CUDA)
+
   find_package(CUDAToolkit REQUIRED)
 
   file(GLOB SOURCES "src/*.cpp")
-  set_source_files_properties(
-      ${SOURCES} PROPERTIES LANGUAGE CUDA)
+  set_source_files_properties(${SOURCES} PROPERTIES LANGUAGE CUDA)
+
   add_executable(gemm ${SOURCES})
 
   target_link_libraries(gemm PRIVATE
-      CUDA::cublas
-      CUDA::curand)
+                        CUDA::cublas
+                        CUDA::curand)
 
   target_compile_definitions(gemm PRIVATE USE_CUDA)
   target_compile_options(gemm PRIVATE --expt-relaxed-constexpr)
