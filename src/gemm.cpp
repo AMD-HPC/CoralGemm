@@ -5,6 +5,7 @@
 /// \author     Jakub Kurzak
 /// \copyright  Advanced Micro Devices, Inc.
 ///
+#include "CommandLine.h"
 #include "DeviceBatchArray.h"
 #include "DeviceBatchedGemm.h"
 
@@ -27,6 +28,23 @@
 void run(int argc, char** argv)
 {
     ASSERT(argc >= 15);
+    CommandLine cmd(argc, argv);
+    cmd.check(
+        1, 4,
+        std::regex(R"(^(?:R_16B|R_16F|R_32F|R_64F|C_32F|C_64F|R_8I|R_32I)$)"));
+    cmd.check(
+        {5, 6},
+        std::regex(R"(^(?:|OP_N|OP_T|OP_C)$)"));
+    cmd.check(
+        7, 14,
+        std::regex(R"(^[0-9]+$)"));
+    if (argc > 15) {
+        cmd.check(
+            15, argc-1,
+            std::regex(R"(^(?:batched|strided|ex|hostA|hostB|hostC|)"
+                       R"(coherentA|coherentB|sharedA|sharedB|)"
+                       R"(zeroBeta|testing|times|hostname|threaded)$)"));
+    }
 
     bool batched = false;
     bool strided = false;
