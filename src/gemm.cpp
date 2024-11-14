@@ -27,7 +27,7 @@
 ///
 void run(int argc, char** argv)
 {
-    ASSERT(argc >= 15);
+    ASSERT(argc >= 15, "Invalid command line.");
     CommandLine cmd(argc, argv);
     cmd.check(
         1, 4,
@@ -37,7 +37,7 @@ void run(int argc, char** argv)
         std::regex(R"(^(?:|OP_N|OP_T|OP_C)$)"));
     cmd.check(
         7, 14,
-        std::regex(R"(^[0-9]+$)"));
+        std::regex(R"(^(?:[0-9]+)$)"));
     if (argc > 15) {
         cmd.check(
             15, argc-1,
