@@ -97,7 +97,7 @@ private:
         std::cout << std::endl;
         for (int i = 0; i < argc; ++i) {
             if (i < error_index) {
-                std::cout << "\033[32m" << argv[i] << " ";
+                std::cout << "\033[38;5;30m" << argv[i] << " ";
             } else if (i == error_index) {
                 std::cout << "\e[5m\033[38;5;200m" << argv[i] << " ";
                 std::cout << "\e[0m\033[0m" << "..." << std::endl;
