@@ -274,6 +274,22 @@ private:
 
 //------------------------------------------------------------------------------
 /// \brief
+///     Implements exception handling for the HIPBLASLT_CALL macro.
+///
+/// \todo
+///     Check if error names and strings not out of sync with hipBLAS
+///     (https://github.com/ROCmSoftwarePlatform/hipBLAS/blob/develop/library/
+///     include/hipblas.h).
+///
+
+/// Checks for errors in HIPBLASLT calls.
+#define HIPBLASLT_CALL(call, ...) \
+    call
+
+
+
+//------------------------------------------------------------------------------
+/// \brief
 ///     Implements exception handling for the HIPRAND_CALL macro.
 ///
 /// \todo

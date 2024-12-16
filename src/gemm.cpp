@@ -8,6 +8,7 @@
 #include "CommandLine.h"
 #include "DeviceBatchArray.h"
 #include "DeviceBatchedGemm.h"
+#include "TypeConstant.h"
 
 #include <chrono>
 #include <iostream>
@@ -41,7 +42,8 @@ void run(int argc, char** argv)
     if (argc > 15) {
         cmd.check(
             15, argc-1,
-            std::regex(R"(^(?:batched|strided|ex|hostA|hostB|hostC|)"
+            std::regex(R"(^(?:batched|strided|ex|lt|)"
+                       R"(hostA|hostB|hostC|)"
                        R"(coherentA|coherentB|sharedA|sharedB|)"
                        R"(zeroBeta|testing|times|hostname|threaded)$)"));
     }
@@ -49,6 +51,7 @@ void run(int argc, char** argv)
     bool batched = false;
     bool strided = false;
     bool ex = false;
+    bool lt = false;
     bool host_a = false;
     bool host_b = false;
     bool host_c = false;
@@ -69,6 +72,7 @@ void run(int argc, char** argv)
         if (str == "batched")   batched = true;
         if (str == "strided")   strided = true;
         if (str == "ex")        ex = true;
+        if (str == "lt")        lt = true;
         if (str == "hostA")     host_a = true;
         if (str == "hostB")     host_b = true;
         if (str == "hostC")     host_c = true;
@@ -173,17 +177,17 @@ void run(int argc, char** argv)
 
     // Assign the mode.
     BatchedGemm::Mode mode;
-    if (strided) {
-        if (ex) mode = BatchedGemm::Mode::StridedBatchedEx;
-        else    mode = BatchedGemm::Mode::StridedBatched;
+                     mode = BatchedGemm::Mode::Standard;
+        if (batched) mode = BatchedGemm::Mode::Batched;
+        if (strided) mode = BatchedGemm::Mode::StridedBatched;
+    if (ex) {
+                     mode = BatchedGemm::Mode::StandardEx;
+        if (batched) mode = BatchedGemm::Mode::BatchedEx;
+        if (strided) mode = BatchedGemm::Mode::StridedBatchedEx;
     }
-    else if (batched) {
-        if (ex) mode = BatchedGemm::Mode::BatchedEx;
-        else    mode = BatchedGemm::Mode::Batched;
-    }
-    else {
-        if (ex) mode = BatchedGemm::Mode::StandardEx;
-        else    mode = BatchedGemm::Mode::Standard;
+    if (lt) {
+                     mode = BatchedGemm::Mode::StandardLt;
+        if (batched) mode = BatchedGemm::Mode::BatchedLt;
     }
 
     // Initialize with a constant or random numbers.

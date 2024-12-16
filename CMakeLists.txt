@@ -37,6 +37,7 @@ elseif(USE_HIP)
 
   find_package(rocblas REQUIRED)
   find_package(hipblas REQUIRED)
+  find_package(hipblaslt REQUIRED)
   find_package(rocrand REQUIRED)
   find_package(hiprand REQUIRED)
 
@@ -49,6 +50,7 @@ elseif(USE_HIP)
                         roc::rocblas
                         roc::rocrand
                         roc::hipblas
+                        roc::hipblaslt
                         hip::hiprand)
 
   target_compile_definitions(gemm PRIVATE USE_HIP)

@@ -88,7 +88,7 @@ BatchedGemm::make(std::string type_a_name,
 
 //------------------------------------------------------------------------------
 /// \brief
-///     Creates an array of BatchedGemm object, one for each GPU in the system.
+///     Creates an array of BatchedGemm objects, one for each GPU in the system.
 ///
 /// \remark
 ///     Not listing parameters common with BatchedGemm::make().

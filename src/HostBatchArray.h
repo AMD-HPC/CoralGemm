@@ -18,7 +18,7 @@
 template <typename T>
 class HostBatchArray: public BatchArray<T> {
 public:
-    HostBatchArray(hipblasDatatype_t type,
+    HostBatchArray(TypeConstant type,
                    int m, int n, int ld,
                    int batch_count,
                    bool coherent = true);
@@ -44,7 +44,7 @@ public:
 ///
 template <typename T>
 inline
-HostBatchArray<T>::HostBatchArray(hipblasDatatype_t type,
+HostBatchArray<T>::HostBatchArray(TypeConstant type,
                                   int m, int n, int ld,
                                   int batch_count,
                                   bool coherent)

@@ -37,7 +37,7 @@
 /// \param[in] device_id
 ///     the number of the device executing the operation
 ///
-DeviceBatchedGemm::DeviceBatchedGemm(hipblasDatatype_t compute_type,
+DeviceBatchedGemm::DeviceBatchedGemm(TypeConstant compute_type,
                                      hipblasOperation_t op_a,
                                      hipblasOperation_t op_b,
                                      BaseBatchArray* a,
@@ -64,6 +64,13 @@ DeviceBatchedGemm::DeviceBatchedGemm(hipblasDatatype_t compute_type,
     HIPBLAS_CALL(hipblasCreate(&hipblas_handle_));
     HIPBLAS_CALL(hipblasSetStream(hipblas_handle_, hip_stream_));
 
+    // Create hipBLASLt handle and matmul descriptor.
+    HIPBLASLT_CALL(hipblasLtCreate(&hipblaslt_handle_));
+    HIPBLASLT_CALL(hipblasLtMatmulDescCreate(
+        &hipblaslt_matmul_desc_,
+        compute_type.compute_,
+        c->type().hip_));
+
     // Create hipRAND generator, assign stream.
     HIPRAND_CALL(hiprandCreateGenerator(&hiprand_generator_,
                                         HIPRAND_RNG_PSEUDO_DEFAULT));
@@ -86,6 +93,8 @@ DeviceBatchedGemm::~DeviceBatchedGemm()
 
     // Destroy all the handles.
     (void)hiprandDestroyGenerator(hiprand_generator_);
+    (void)hipblasLtMatmulDescDestroy(hipblaslt_matmul_desc_);
+    (void)hipblasLtDestroy(hipblaslt_handle_);
     (void)hipblasDestroy(hipblas_handle_);
     (void)hipStreamDestroy(hip_stream_);
 
@@ -108,6 +117,7 @@ DeviceBatchedGemm::~DeviceBatchedGemm()
 ///     - StandardEx:      regular GEMM, multi-precision
 ///     - BatchedEx:       batched GEMM, multi-precision
 ///     - StridedBatchedEx strided GEMM, multi-precision
+///     - StandardLt       regular GEMM, hipBLASLt
 ///
 void DeviceBatchedGemm::run(Mode mode)
 {
@@ -133,6 +143,12 @@ void DeviceBatchedGemm::run(Mode mode)
         case Mode::StridedBatchedEx:
             runStridedBatchedGemmEx();
             break;
+        case Mode::StandardLt:
+            runGemmLt();
+            break;
+        case Mode::BatchedLt:
+            runBatchedGemmLt();
+            break;
         default:
             ERROR("Unsupported mode");
     }
@@ -141,20 +157,23 @@ void DeviceBatchedGemm::run(Mode mode)
 //------------------------------------------------------------------------------
 /// \brief
 ///     Runs the workload.
-///     Invokes the standard API in a loop.
+///     Calls the standard API in a loop.
 ///     Collects the times for all calls.
 ///
 void DeviceBatchedGemm::runGemm()
 {
     // Check if all types are the same.
-    ASSERT(a_->type() == b_->type(), "Missing \"ex\" in the command line?");
-    ASSERT(b_->type() == c_->type(), "Missing \"ex\" in the command line?");
+    ASSERT(a_->type().hip_ == b_->type().hip_,
+           "Missing \"ex\" in the command line?");
+
+    ASSERT(b_->type().hip_ == c_->type().hip_,
+           "Missing \"ex\" in the command line?");
 
     // Call in a loop, record events.
     // Use the standard API (not Ex).
     for (int i = 0; i < batch_count_; ++i) {
         HIP_CALL(hipEventRecord(start[i]));
-        hipblas::gemm(c_->type(),
+        hipblas::gemm(c_->type().hipblas_,
                       hipblas_handle_,
                       op_a_,
                       op_b_,
@@ -171,18 +190,21 @@ void DeviceBatchedGemm::runGemm()
 //------------------------------------------------------------------------------
 /// \brief
 ///     Runs the workload.
-///     Invokes the batched API once and collects the time.
+///     Calls the batched API once and collects the time.
 ///
 void DeviceBatchedGemm::runBatchedGemm()
 {
     // Check if all types are the same.
-    ASSERT(a_->type() == b_->type(), "Missing \"ex\" in the command line?");
-    ASSERT(b_->type() == c_->type(), "Missing \"ex\" in the command line?");
+    ASSERT(a_->type().hip_ == b_->type().hip_,
+           "Missing \"ex\" in the command line?");
+
+    ASSERT(b_->type().hip_ == c_->type().hip_,
+           "Missing \"ex\" in the command line?");
 
     // Call once, record start and stop.
     // Use the standard API (not Ex).
     HIP_CALL(hipEventRecord(start[0]));
-    hipblas::gemmBatched(c_->type(),
+    hipblas::gemmBatched(c_->type().hipblas_,
                          hipblas_handle_,
                          op_a_,
                          op_b_,
@@ -199,13 +221,16 @@ void DeviceBatchedGemm::runBatchedGemm()
 //------------------------------------------------------------------------------
 /// \brief
 ///     Runs the workload.
-///     Invokes the strided batched API once and collects the time.
+///     Calls the strided batched API once and collects the time.
 ///
 void DeviceBatchedGemm::runStridedBatchedGemm()
 {
     // Check if all types are the same.
-    ASSERT(a_->type() == b_->type(), "Missing \"ex\" in the command line?");
-    ASSERT(b_->type() == c_->type(), "Missing \"ex\" in the command line?");
+    ASSERT(a_->type().hip_ == b_->type().hip_,
+           "Missing \"ex\" in the command line?");
+
+    ASSERT(b_->type().hip_ == c_->type().hip_,
+           "Missing \"ex\" in the command line?");
 
     // Compute strides (= sizes of matrices).
     size_t stride_a = size_t(a_->ld())*(HIPBLAS_OP_N ? a_->n() : a_->m());
@@ -215,7 +240,7 @@ void DeviceBatchedGemm::runStridedBatchedGemm()
     // Call once, record start and stop.
     // Use the standard API (not Ex).
     HIP_CALL(hipEventRecord(start[0]));
-    hipblas::gemmStridedBatched(c_->type(),
+    hipblas::gemmStridedBatched(c_->type().hipblas_,
                                 hipblas_handle_,
                                 op_a_,
                                 op_b_,
@@ -232,7 +257,7 @@ void DeviceBatchedGemm::runStridedBatchedGemm()
 //------------------------------------------------------------------------------
 /// \brief
 ///     Runs the workload.
-///     Invokes the Ex API in a loop.
+///     Calls the Ex API in a loop.
 ///     Collects the times of all calls.
 ///
 void DeviceBatchedGemm::runGemmEx()
@@ -247,10 +272,10 @@ void DeviceBatchedGemm::runGemmEx()
                           c_->m(),
                           c_->n(),
                           op_a_ == HIPBLAS_OP_N ? a_->n() : a_->m(),
-                          alpha_, a_->h_array(i), a_->type(), a_->ld(),
-                                  b_->h_array(i), b_->type(), b_->ld(),
-                          beta_,  c_->h_array(i), c_->type(), c_->ld(),
-                          compute_type_,
+                          alpha_, a_->h_array(i), a_->type().hipblas_, a_->ld(),
+                                  b_->h_array(i), b_->type().hipblas_, b_->ld(),
+                          beta_,  c_->h_array(i), c_->type().hipblas_, c_->ld(),
+                          compute_type_.hipblas_,
                           HIPBLAS_GEMM_DEFAULT));
         HIP_CALL(hipEventRecord(stop[i]));
     }
@@ -259,34 +284,35 @@ void DeviceBatchedGemm::runGemmEx()
 //------------------------------------------------------------------------------
 /// \brief
 ///     Runs the workload.
-///     Invokes the batched Ex API once and collects the time.
+///     Calls the batched Ex API once and collects the time.
 ///
 void DeviceBatchedGemm::runBatchedGemmEx()
 {
     // Call once, record start and stop.
     HIP_CALL(hipEventRecord(start[0]));
     HIPBLAS_CALL(
-        hipblasGemmBatchedEx(hipblas_handle_,
-                             op_a_,
-                             op_b_,
-                             c_->m(),
-                             c_->n(),
-                             op_a_ == HIPBLAS_OP_N ? a_->n() : a_->m(),
-                             alpha_,
-                             (void const**)a_->d_array(), a_->type(), a_->ld(),
-                             (void const**)b_->d_array(), b_->type(), b_->ld(),
-                             beta_,
-                             c_->d_array(), c_->type(), c_->ld(),
-                             batch_count_,
-                             compute_type_,
-                             HIPBLAS_GEMM_DEFAULT));
+        hipblasGemmBatchedEx(
+            hipblas_handle_,
+            op_a_,
+            op_b_,
+            c_->m(),
+            c_->n(),
+            op_a_ == HIPBLAS_OP_N ? a_->n() : a_->m(),
+            alpha_,
+            (void const**)a_->d_array(), a_->type().hipblas_, a_->ld(),
+            (void const**)b_->d_array(), b_->type().hipblas_, b_->ld(),
+            beta_,
+            c_->d_array(), c_->type().hipblas_, c_->ld(),
+            batch_count_,
+            compute_type_.hipblas_,
+            HIPBLAS_GEMM_DEFAULT));
     HIP_CALL(hipEventRecord(stop[0]));
 }
 
 //------------------------------------------------------------------------------
 /// \brief
 ///     Runs the workload.
-///     Invokes the strided batched Ex API once and collects the time.
+///     Calls the strided batched Ex API once and collects the time.
 ///
 void DeviceBatchedGemm::runStridedBatchedGemmEx()
 {
@@ -297,18 +323,94 @@ void DeviceBatchedGemm::runStridedBatchedGemmEx()
 
     // Call once, record start and stop.
     HIP_CALL(hipEventRecord(start[0]));
-    hipblasGemmStridedBatchedEx(hipblas_handle_,
-                                op_a_,
-                                op_b_,
-                                c_->m(),
-                                c_->n(),
-                                op_a_ == HIPBLAS_OP_N ? a_->n() : a_->m(),
-                                alpha_, a_->data(), a_->type(), a_->ld(), stride_a,
-                                        b_->data(), b_->type(), b_->ld(), stride_b,
-                                beta_,  c_->data(), c_->type(), c_->ld(), stride_c,
-                                batch_count_,
-                                compute_type_,
-                                HIPBLAS_GEMM_DEFAULT);
+    HIPBLAS_CALL(
+        hipblasGemmStridedBatchedEx(
+            hipblas_handle_,
+            op_a_,
+            op_b_,
+            c_->m(),
+            c_->n(),
+            op_a_ == HIPBLAS_OP_N ? a_->n() : a_->m(),
+            alpha_, a_->data(), a_->type().hipblas_, a_->ld(), stride_a,
+                    b_->data(), b_->type().hipblas_, b_->ld(), stride_b,
+            beta_,  c_->data(), c_->type().hipblas_, c_->ld(), stride_c,
+            batch_count_,
+            compute_type_.hipblas_,
+            HIPBLAS_GEMM_DEFAULT));
+    HIP_CALL(hipEventRecord(stop[0]));
+}
+
+//------------------------------------------------------------------------------
+/// \brief
+///     Runs the workload.
+///     Calls hipBLASLt in a loop.
+///     Collects the times of all calls.
+///
+void DeviceBatchedGemm::runGemmLt()
+{
+    // Set the transpositions.
+    HIPBLASLT_CALL(
+        hipblasLtMatmulDescSetAttribute(hipblaslt_matmul_desc_,
+                                        HIPBLASLT_MATMUL_DESC_TRANSA,
+                                        &op_a_, sizeof(op_a_)));
+    HIPBLASLT_CALL(
+        hipblasLtMatmulDescSetAttribute(hipblaslt_matmul_desc_,
+                                        HIPBLASLT_MATMUL_DESC_TRANSA,
+                                        &op_b_, sizeof(op_b_)));
+
+    // Call in a loop, record events.
+    for (int i = 0; i < batch_count_; ++i) {
+        HIP_CALL(hipEventRecord(start[i]));
+        HIPBLASLT_CALL(
+            hipblasLtMatmul(hipblaslt_handle_,
+                            hipblaslt_matmul_desc_,
+                            alpha_, a_->h_array(i), a_->layout(),
+                                    b_->h_array(i), b_->layout(),
+                            beta_,  c_->h_array(i), c_->layout(),
+                                    c_->h_array(i), c_->layout(),
+                            nullptr, nullptr, 0, hip_stream_));
+        HIP_CALL(hipEventRecord(stop[i]));
+    }
+}
+
+//------------------------------------------------------------------------------
+/// \brief
+///     Runs the workload.
+///     Calls hipBLASLt in a loop.
+///     Collects the times of all calls.
+///
+void DeviceBatchedGemm::runBatchedGemmLt()
+{
+    // Set the transpositions.
+    HIPBLASLT_CALL(
+        hipblasLtMatmulDescSetAttribute(hipblaslt_matmul_desc_,
+                                        HIPBLASLT_MATMUL_DESC_TRANSA,
+                                        &op_a_, sizeof(op_a_)));
+    HIPBLASLT_CALL(
+        hipblasLtMatmulDescSetAttribute(hipblaslt_matmul_desc_,
+                                        HIPBLASLT_MATMUL_DESC_TRANSA,
+                                        &op_b_, sizeof(op_b_)));
+
+    // Set the batch count.
+    a_->batch_count(batch_count_);
+    b_->batch_count(batch_count_);
+    c_->batch_count(batch_count_);
+
+    // Set the batch offset.
+    a_->batch_offset(int64_t(a_->ld())*a_->n());
+    b_->batch_offset(int64_t(b_->ld())*b_->n());
+    c_->batch_offset(int64_t(c_->ld())*c_->n());
+
+    // Call once, record start and stop.
+    HIP_CALL(hipEventRecord(start[0]));
+    HIPBLASLT_CALL(
+        hipblasLtMatmul(hipblaslt_handle_,
+                        hipblaslt_matmul_desc_,
+                        alpha_, a_->data(), a_->layout(),
+                                b_->data(), b_->layout(),
+                        beta_,  c_->data(), c_->layout(),
+                                c_->data(), c_->layout(),
+                        nullptr, nullptr, 0, hip_stream_));
     HIP_CALL(hipEventRecord(stop[0]));
 }
 

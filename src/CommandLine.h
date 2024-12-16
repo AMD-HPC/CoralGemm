@@ -44,7 +44,8 @@ public:
     ///     the regular expression pattern each argument should match
     ///
     void check(const std::vector<int>& indices,
-               const std::regex& pattern) const {
+               const std::regex& pattern) const
+    {
         for (int idx : indices) {
             // Check if all indices are in range.
             assert(idx >= 1 && idx < argc);

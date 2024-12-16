@@ -18,7 +18,7 @@
 template <typename T>
 class DeviceBatchArray: public BatchArray<T> {
 public:
-    DeviceBatchArray(hipblasDatatype_t type,
+    DeviceBatchArray(TypeConstant type,
                      int m, int n, int ld,
                      int batch_count,
                      int device_id = 0);
@@ -46,7 +46,7 @@ private:
 ///
 template <typename T>
 inline
-DeviceBatchArray<T>::DeviceBatchArray(hipblasDatatype_t type,
+DeviceBatchArray<T>::DeviceBatchArray(TypeConstant type,
                                       int m, int n, int ld,
                                       int batch_count,
                                       int device_id)
@@ -63,6 +63,10 @@ DeviceBatchArray<T>::DeviceBatchArray(hipblasDatatype_t type,
     HIP_CALL(hipMalloc(&this->d_array_, sizeof(T*)*batch_count));
     HIP_CALL(hipMemcpy(this->d_array_, this->h_array_, sizeof(T*)*batch_count,
                        hipMemcpyHostToDevice));
+
+    HIPBLASLT_CALL(hipblasLtMatrixLayoutCreate(&this->layout_,
+                                               type.hip(),
+                                               m, n, ld));
 }
 
 //------------------------------------------------------------------------------
@@ -71,6 +75,7 @@ inline
 DeviceBatchArray<T>::~DeviceBatchArray()
 {
     (void)hipSetDevice(device_id_);
+    (void)hipblasLtMatrixLayoutDestroy(this->layout_);
     (void)hipFree(this->d_array_);
     (void)hipFree(this->h_array_);
     (void)hipFree(this->data_);

@@ -15,6 +15,8 @@
 #if defined(USE_HIP)
     #include <hip/hip_runtime.h>
     #include <hipblas/hipblas.h>
+    #include <hipblaslt/hipblaslt.h>
+    #include <hipblaslt/hipblaslt-ext.hpp>
     #include <hiprand/hiprand.h>
     #include "hipblaspp.h"
 #elif defined(USE_CUDA)
@@ -38,7 +40,7 @@
 ///
 class DeviceBatchedGemm: public BatchedGemm {
 public:
-    DeviceBatchedGemm(hipblasDatatype_t compute_type,
+    DeviceBatchedGemm(TypeConstant compute_type,
                       hipblasOperation_t op_a,
                       hipblasOperation_t op_b,
                       BaseBatchArray* a,
@@ -82,12 +84,16 @@ private:
     void runGemmEx();
     void runBatchedGemmEx();
     void runStridedBatchedGemmEx();
+    void runGemmLt();
+    void runBatchedGemmLt();
 
     int device_id_; ///< the number of the device executing the operation
 
-    hipStream_t hip_stream_;               ///< stream for the operation
-    hipblasHandle_t hipblas_handle_;       ///< handle for the operation
-    hiprandGenerator_t hiprand_generator_; ///< random number generator
+    hipStream_t hip_stream_;                      ///< stream
+    hipblasHandle_t hipblas_handle_;              ///< hipBLAS handle
+    hipblasLtHandle_t hipblaslt_handle_;          ///< hipBLASLt handle
+    hipblasLtMatmulDesc_t hipblaslt_matmul_desc_; ///< hipBLASLt mm descriptor
+    hiprandGenerator_t hiprand_generator_;        ///< random number generator
 
     std::vector<hipEvent_t> start; ///< events for recording start times
     std::vector<hipEvent_t> stop;  ///< events for recording end times
