@@ -281,12 +281,97 @@ private:
 ///     (https://github.com/ROCmSoftwarePlatform/hipBLAS/blob/develop/library/
 ///     include/hipblas.h).
 ///
+class HIPBLASLTException : public Exception {
+public:
+    HIPBLASLTException(const char* call,
+                       hipblasStatus_t code,
+                       const char* func,
+                       const char* file,
+                       int line)
+        : Exception(
+            std::string("\033[38;5;200mHIPBLASLT ERROR:\033[38;5;255m ")+
+            call+" returned "+errorName(code)+
+            " ("+errorString(code)+").", func, file, line) {}
+
+    HIPBLASLTException(const char* call,
+                     hipblasStatus_t code,
+                     const char* description,
+                     const char* func,
+                     const char* file,
+                     int line)
+        : Exception(
+            std::string("\033[38;5;200mHIPBLASLT ERROR:\033[38;5;255m ")+
+            description+" \n"+call+" returned "+errorName(code)+
+            " ("+errorString(code)+").", func, file, line) {}
+
+private:
+    std::string const& errorName(hipblasStatus_t code)
+    {
+        static std::map<int, std::string> error_names {
+            {HIPBLAS_STATUS_SUCCESS,
+            "HIPBLAS_STATUS_SUCCESS"},
+            {HIPBLAS_STATUS_NOT_INITIALIZED,
+            "HIPBLAS_STATUS_NOT_INITIALIZED"},
+            {HIPBLAS_STATUS_ALLOC_FAILED,
+            "HIPBLAS_STATUS_ALLOC_FAILED"},
+            {HIPBLAS_STATUS_INVALID_VALUE,
+            "HIPBLAS_STATUS_INVALID_VALUE"},
+            {HIPBLAS_STATUS_MAPPING_ERROR,
+            "HIPBLAS_STATUS_MAPPING_ERROR"},
+            {HIPBLAS_STATUS_EXECUTION_FAILED,
+            "HIPBLAS_STATUS_EXECUTION_FAILED"},
+            {HIPBLAS_STATUS_INTERNAL_ERROR,
+            "HIPBLAS_STATUS_INTERNAL_ERROR"},
+            {HIPBLAS_STATUS_NOT_SUPPORTED,
+            "HIPBLAS_STATUS_NOT_SUPPORTED"},
+            {HIPBLAS_STATUS_ARCH_MISMATCH,
+            "HIPBLAS_STATUS_ARCH_MISMATCH"},
+#if !defined(USE_CUDA)
+            {HIPBLAS_STATUS_HANDLE_IS_NULLPTR,
+            "HIPBLAS_STATUS_HANDLE_IS_NULLPTR"}
+#endif
+        };
+        return error_names[code];
+    }
+
+    std::string const& errorString(hipblasStatus_t code)
+    {
+        static std::map<int, std::string> error_strings {
+            {HIPBLAS_STATUS_SUCCESS,
+            "Function succeeds"},
+            {HIPBLAS_STATUS_NOT_INITIALIZED,
+            "HIPBLAS library not initialized"},
+            {HIPBLAS_STATUS_ALLOC_FAILED,
+            "resource allocation failed"},
+            {HIPBLAS_STATUS_INVALID_VALUE,
+            "unsupported numerical value was passed to function"},
+            {HIPBLAS_STATUS_MAPPING_ERROR,
+            "access to GPU memory space failed"},
+            {HIPBLAS_STATUS_EXECUTION_FAILED,
+            "GPU program failed to execute"},
+            {HIPBLAS_STATUS_INTERNAL_ERROR,
+            "an internal HIPBLAS operation failed"},
+            {HIPBLAS_STATUS_NOT_SUPPORTED,
+            "function not implemented"},
+            {HIPBLAS_STATUS_ARCH_MISMATCH,
+            ""},
+#if !defined(USE_CUDA)
+            {HIPBLAS_STATUS_HANDLE_IS_NULLPTR,
+            "hipBLAS handle is null pointer"}
+#endif
+        };
+        return error_strings[code];
+    }
+};
 
 /// Checks for errors in HIPBLASLT calls.
 #define HIPBLASLT_CALL(call, ...) \
-    call
-
-
+{ \
+    hipblasStatus_t code = call; \
+    if (code != HIPBLAS_STATUS_SUCCESS) \
+        throw HIPBLASLTException(#call, code, ##__VA_ARGS__, \
+                                 __func__, __FILE__, __LINE__); \
+}
 
 //------------------------------------------------------------------------------
 /// \brief
