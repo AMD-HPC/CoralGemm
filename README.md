@@ -132,12 +132,11 @@ When `TIME_SPAN` is set to 0, one warmup run is done, followed by one timing run
 * repeats until `TIME_SPAN` exceeded
 * executes simulteneously on all devices
 
-If `testing` is set, a primitive sanity test is ran.
-The test uses `assert()` in device code and requires `-DCMAKE_BUILD_TYPE=DEBUG`.
-Entries of A, B, and C are set to 1, and so are the factors `alpha` and `beta`.
-Then, after GEMM is ran, all entries of C are checked to contain k+1.
-Note that performance is usually much higher when using integer initialization
-than when using random data.
+If `testing` is set, a primitive sanity test is ran.\
+The test uses `assert()` in device code and requires `-DCMAKE_BUILD_TYPE=DEBUG`.\
+Entries of A, B, and C are set to 1, and so are the factors `alpha` and `beta`.\
+Then, after GEMM is ran, all entries of C are checked to contain k+1.\
+Note that performance is usually much higher when using integer initialization.
 
 ## Help
 
