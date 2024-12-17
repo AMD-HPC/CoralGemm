@@ -104,6 +104,8 @@ When `TIME_SPAN` is set to 0, one warmup run is done, followed by one timing run
 
 ### Supported Precisions:
 
+* `R_8B`: FP8 E5M2
+* `R_8F`: FP8 E4M3
 * `R_16B`: BF16
 * `R_16F`: FP16
 * `R_32F`: float
