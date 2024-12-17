@@ -50,6 +50,8 @@ public:
             {"R_32F", R_32F}, // 32 bit floating point, real
             {"R_16F", R_16F}, // 16 bit floating point, real
             {"R_16B", R_16B}, // 16 bit bfloat, real
+            {"R_8F",  R_8F},  //  8 bit floating poing (e4m3)
+            {"R_8B",  R_8B},  //  8 bit bfloat (e5m2)
             {"R_32I", R_32I}, // 32 bit signed integer, real
             {"R_8I",  R_8I},  //  8 bit signed integer, real
             {"C_64F", C_64F}, // 64 bit floating point, complex

@@ -47,8 +47,17 @@ BaseBatchArray::make(TypeConstant type,
     if (device_id < 0) {
         // Return HostBatchArray
         switch (type.hip_) {
+            case HIP_R_8F_E4M3:
+                return new HostBatchArray<fp8>(
+                    type, m, n, ld, batch_count, coherent);
+            case HIP_R_8F_E5M2:
+                return new HostBatchArray<bf8>(
+                    type, m, n, ld, batch_count, coherent);
             case HIP_R_16F:
                 return new HostBatchArray<__half>(
+                    type, m, n, ld, batch_count, coherent);
+            case HIP_R_16BF:
+                return new HostBatchArray<hip_bfloat16>(
                     type, m, n, ld, batch_count, coherent);
             case HIP_R_32F:
                 return new HostBatchArray<float>(
@@ -56,7 +65,6 @@ BaseBatchArray::make(TypeConstant type,
             case HIP_R_64F:
                 return new HostBatchArray<double>(
                     type, m, n, ld, batch_count, coherent);
-//          case HIP_C_16F:
             case HIP_C_32F:
                 return new HostBatchArray<std::complex<float>>(
                     type, m, n, ld, batch_count, coherent);
@@ -66,23 +74,9 @@ BaseBatchArray::make(TypeConstant type,
             case HIP_R_8I:
                 return new HostBatchArray<int8_t>(
                     type, m, n, ld, batch_count, coherent);
-//          case HIP_R_8U:
-//              return new HostBatchArray<uint8_t>(
-//                  type, m, n, ld, batch_count, coherent);
             case HIP_R_32I:
                 return new HostBatchArray<int32_t>(
                     type, m, n, ld, batch_count);
-//          case HIP_R_32U:
-//              return new HostBatchArray<uint32_t>(
-//                  type, m, n, ld, batch_count, coherent);
-//          case HIP_C_8I:
-//          case HIP_C_8U:
-//          case HIP_C_32I:
-//          case HIP_C_32U:
-            case HIP_R_16BF:
-                return new HostBatchArray<hip_bfloat16>(
-                    type, m, n, ld, batch_count, coherent);
-//          case HIP_C_16B:
             default:
                 ERROR("unsupported data type");
         }
@@ -90,8 +84,17 @@ BaseBatchArray::make(TypeConstant type,
     else {
         // Return DeviceBatchArray
         switch (type.hip_) {
+            case HIP_R_8F_E4M3:
+                return new DeviceBatchArray<fp8>(
+                    type, m, n, ld, batch_count, device_id);
+            case HIP_R_8F_E5M2:
+                return new DeviceBatchArray<bf8>(
+                    type, m, n, ld, batch_count, device_id);
             case HIP_R_16F:
                 return new DeviceBatchArray<__half>(
+                    type, m, n, ld, batch_count, device_id);
+            case HIP_R_16BF:
+                return new DeviceBatchArray<hip_bfloat16>(
                     type, m, n, ld, batch_count, device_id);
             case HIP_R_32F:
                 return new DeviceBatchArray<float>(
@@ -99,7 +102,6 @@ BaseBatchArray::make(TypeConstant type,
             case HIP_R_64F:
                 return new DeviceBatchArray<double>(
                     type, m, n, ld, batch_count, device_id);
-//          case HIP_C_16F:
             case HIP_C_32F:
                 return new DeviceBatchArray<std::complex<float>>(
                     type, m, n, ld, batch_count, device_id);
@@ -109,23 +111,9 @@ BaseBatchArray::make(TypeConstant type,
             case HIP_R_8I:
                 return new DeviceBatchArray<int8_t>(
                     type, m, n, ld, batch_count, device_id);
-//          case HIP_R_8U:
-//              return new DeviceBatchArray<uint8_t>(
-//                  type, m, n, ld, batch_count, device_id);
             case HIP_R_32I:
                 return new DeviceBatchArray<int32_t>(
                     type, m, n, ld, batch_count, device_id);
-//          case HIP_R_32U:
-//              return new DeviceBatchArray<uint32_t>(
-//                  type, m, n, ld, batch_count, device_id);
-//          case HIP_C_8I:
-//          case HIP_C_8U:
-//          case HIP_C_32I:
-//          case HIP_C_32U:
-            case HIP_R_16BF:
-                return new DeviceBatchArray<hip_bfloat16>(
-                    type, m, n, ld, batch_count, device_id);
-//          case HIP_C_16B:
             default:
                 ERROR("unsupported data type");
         }

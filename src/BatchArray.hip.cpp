@@ -5,6 +5,8 @@
 /// \author     Jakub Kurzak
 /// \copyright  Advanced Micro Devices, Inc.
 ///
+#include <hip/hip_fp8.h>
+
 #include "BatchArray.h"
 
 //------------------------------------------------------------------------------
@@ -16,7 +18,17 @@ __global__
 void generateConstKernel(
     int m, int n, T** d_array, int lda, double val)
 {
-    T value = (T)val;
+    T value;
+    if constexpr (std::is_same<T, fp8>::value) {
+        value = fp8(internal::cast_to_f8<double, true>(val, /*wm*/3, /*we*/4));
+    }
+    else if constexpr (std::is_same<T, bf8>::value) {
+        value = bf8(internal::cast_to_f8<double, true>(val, /*wm*/2, /*we*/5));
+    }
+    else {
+        value = T(val);
+    }
+
     T* A = d_array[blockIdx.y];
     int i = blockIdx.x*blockDim.x + threadIdx.x;
     for (int j = 0; j < n; ++j) {
@@ -34,12 +46,28 @@ __global__
 void validateConstKernel(
     int m, int n, T** d_array, int lda, double val)
 {
-    T value = (T)val;
     T* A = d_array[blockIdx.y];
     int i = blockIdx.x*blockDim.x + threadIdx.x;
     for (int j = 0; j < n; ++j) {
-        if (i < m)
-            assert(A[std::size_t(lda)*j + i] == value);
+        if (i < m) {
+            double value;
+            if constexpr (std::is_same<T, fp8>::value) {
+                value = internal::cast_from_f8<double, true>(
+                    static_cast<__hip_fp8_storage_t>(A[j]), /*wm*/3, /*we*/4);
+            }
+            else if constexpr (std::is_same<T, bf8>::value) {
+                value = internal::cast_from_f8<double, true>(
+                    static_cast<__hip_fp8_storage_t>(A[j]), /*wm*/2, /*we*/5);
+            }
+            else if constexpr (std::is_same<T, std::complex<float>>::value ||
+                               std::is_same<T, std::complex<double>>::value) {
+                value = std::real(A[j]);
+            }
+            else {
+                value = static_cast<double>(A[j]);
+            }
+            assert(value == val);
+        }
     }
 }
 
@@ -61,6 +89,12 @@ void BatchArray<T>::generateConstant(int device_id, double val)
 
 template
 void BatchArray<int8_t>::generateConstant(int device_id, double val);
+
+template
+void BatchArray<fp8>::generateConstant(int device_id, double val);
+
+template
+void BatchArray<bf8>::generateConstant(int device_id, double val);
 
 template
 void BatchArray<__half>::generateConstant(int device_id, double val);
@@ -102,6 +136,12 @@ void BatchArray<T>::validateConstant(int device_id, double val)
 
 template
 void BatchArray<int8_t>::validateConstant(int device_id, double val);
+
+template
+void BatchArray<fp8>::validateConstant(int device_id, double val);
+
+template
+void BatchArray<bf8>::validateConstant(int device_id, double val);
 
 template
 void BatchArray<__half>::validateConstant(int device_id, double val);

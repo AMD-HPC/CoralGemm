@@ -32,7 +32,8 @@ void run(int argc, char** argv)
     CommandLine cmd(argc, argv);
     cmd.check(
         1, 4,
-        std::regex(R"(^(?:R_16B|R_16F|R_32F|R_64F|C_32F|C_64F|R_8I|R_32I)$)"));
+        std::regex(R"(^(?:R_8B|R_8F|R_16B|R_16F|R_32F|)"
+                   R"(R_64F|C_32F|C_64F|R_8I|R_32I)$)"));
     cmd.check(
         {5, 6},
         std::regex(R"(^(?:|OP_N|OP_T|OP_C)$)"));
@@ -140,18 +141,18 @@ void run(int argc, char** argv)
     void* alpha;
     void* beta;
 
-    std::string type_c(argv[3]);
-    if      (type_c == "R_32F") alpha = &alpha_r_32f;
-    else if (type_c == "R_64F") alpha = &alpha_r_64f;
-    else if (type_c == "C_32F") alpha = &alpha_c_32f;
-    else if (type_c == "C_64F") alpha = &alpha_c_64f;
-    else if (type_c == "R_32I") alpha = &alpha_r_32i;
+    std::string compute_type(argv[4]);
+    if      (compute_type == "R_32F") alpha = &alpha_r_32f;
+    else if (compute_type == "R_64F") alpha = &alpha_r_64f;
+    else if (compute_type == "C_32F") alpha = &alpha_c_32f;
+    else if (compute_type == "C_64F") alpha = &alpha_c_64f;
+    else if (compute_type == "R_32I") alpha = &alpha_r_32i;
 
-    if      (type_c == "R_32F") beta = &beta_r_32f;
-    else if (type_c == "R_64F") beta = &beta_r_64f;
-    else if (type_c == "C_32F") beta = &beta_c_32f;
-    else if (type_c == "C_64F") beta = &beta_c_64f;
-    else if (type_c == "R_32I") beta = &beta_r_32i;
+    if      (compute_type == "R_32F") beta = &beta_r_32f;
+    else if (compute_type == "R_64F") beta = &beta_r_64f;
+    else if (compute_type == "C_32F") beta = &beta_c_32f;
+    else if (compute_type == "C_64F") beta = &beta_c_64f;
+    else if (compute_type == "R_32I") beta = &beta_r_32i;
 
     std::vector<BatchedGemm*> dev_gemms;
     BatchedGemm::makeDevices(std::string(argv[1]), // type a
