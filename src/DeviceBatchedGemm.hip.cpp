@@ -164,10 +164,10 @@ void DeviceBatchedGemm::runGemm()
 {
     // Check if all types are the same.
     ASSERT(a_->type().hip_ == b_->type().hip_,
-           "Missing \"ex\" in the command line?");
+           "Missing \"ex\" or \"lt\" in the command line?");
 
     ASSERT(b_->type().hip_ == c_->type().hip_,
-           "Missing \"ex\" in the command line?");
+           "Missing \"ex\" or \"lt\" in the command line?");
 
     // Call in a loop, record events.
     // Use the standard API (not Ex).
@@ -196,10 +196,10 @@ void DeviceBatchedGemm::runBatchedGemm()
 {
     // Check if all types are the same.
     ASSERT(a_->type().hip_ == b_->type().hip_,
-           "Missing \"ex\" in the command line?");
+           "Missing \"ex\" or \"lt\" in the command line?");
 
     ASSERT(b_->type().hip_ == c_->type().hip_,
-           "Missing \"ex\" in the command line?");
+           "Missing \"ex\" or \"lt\" in the command line?");
 
     // Call once, record start and stop.
     // Use the standard API (not Ex).
@@ -227,10 +227,10 @@ void DeviceBatchedGemm::runStridedBatchedGemm()
 {
     // Check if all types are the same.
     ASSERT(a_->type().hip_ == b_->type().hip_,
-           "Missing \"ex\" in the command line?");
+           "Missing \"ex\" or \"lt\" in the command line?");
 
     ASSERT(b_->type().hip_ == c_->type().hip_,
-           "Missing \"ex\" in the command line?");
+           "Missing \"ex\" or \"lt\" in the command line?");
 
     // Compute strides (= sizes of matrices).
     size_t stride_a = size_t(a_->ld())*(HIPBLAS_OP_N ? a_->n() : a_->m());
