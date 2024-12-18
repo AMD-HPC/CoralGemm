@@ -57,7 +57,7 @@ cmake -DUSE_HIP=OFF -DUSE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=90 ..
 ### Mixed-Precision
 
 Support for FP16 and BF16 is provided by the Ex API of hipBLAS.\
-Use the "ex" command line option to use the Ex API.
+Use the `ex` command line option to use the Ex API.
 
 To run **half-precision (FP16)** GEMM with accumulation to FP32 on the MI200 series devices call, e.g.:\
 `./gemm R_16F R_16F R_32F R_32F OP_N OP_T 8640 8640 8640 8640 8640 8640 50 300 ex`
@@ -66,7 +66,7 @@ To run **bfloat16 (BF16)** GEMM with accumulation to FP32 on the MI200 series de
 `./gemm R_16B R_16B R_32F R_32F OP_N OP_T 8640 8640 8640 8640 8640 8640 50 300 ex`
 
 Support for FP8 types, E4M3 and E5M2, is provided by hipBLASLt.\
-Use the "lt" command line option to use hipBLASLt.
+Use the `lt` command line option to use hipBLASLt.
 
 To run **FP8 (E4M3)** GEMM with accumulation to FP32 on the MI300 series devices call, e.g.:\
 `./gemm R_8F R_8F R_32F R_32F OP_N OP_T 8640 8640 8640 8640 8640 8640 50 300 lt`
