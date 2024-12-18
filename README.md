@@ -85,6 +85,7 @@ To run **bfloat16 (BF16)** GEMM with accumulation to FP32 on the MI200 series de
            [batched]    run batched GEMM
            [strided]    run strided batched GEMM
            [ex]         use the Ex API
+           [lt]         use hipBLASLt
            [hostA]      A in host memory
            [hostB]      B in host memory
            [hostC]      C in host memory
