@@ -8,7 +8,7 @@
 #pragma once
 
 #include "Exception.h"
-#include "TypeConstant.h"
+#include "FloatTypes.h"
 
 #include <complex>
 #include <limits>

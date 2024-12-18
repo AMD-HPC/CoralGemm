@@ -19,7 +19,7 @@
     #include "hiprand2curand.h"
 #endif
 
-#include "TypeConstant.h"
+#include "FloatTypes.h"
 
 //------------------------------------------------------------------------------
 /// \brief

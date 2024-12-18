@@ -8,7 +8,7 @@
 #include "CommandLine.h"
 #include "DeviceBatchArray.h"
 #include "DeviceBatchedGemm.h"
-#include "TypeConstant.h"
+#include "FloatTypes.h"
 
 #include <chrono>
 #include <iostream>
