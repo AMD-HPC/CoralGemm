@@ -169,6 +169,7 @@ void run(int argc, char** argv)
                              std::atoi(argv[12]),  // ldc
                              std::atoi(argv[13]),  // batch count
                              alpha, beta,
+                             lt,                   // hipBLASLt?
                              host_a, host_b, host_c,
                              coherent_a, coherent_b, coherent_c,
                              shared_a, shared_b,

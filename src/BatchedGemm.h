@@ -94,7 +94,8 @@ public:
                              int batch_count,
                              void const* alpha,
                              void const* beta,
-                             int device_id = 0);
+                             int device_id,
+                             bool lt);
 
     static void makeDevices(std::string type_a_name,
                             std::string type_b_name,
@@ -107,6 +108,7 @@ public:
                             int batch_count,
                             void const* alpha,
                             void const* beta,
+                            bool lt,
                             bool host_a,
                             bool host_b,
                             bool host_c,

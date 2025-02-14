@@ -37,6 +37,9 @@
 /// \param[in] device_id
 ///     the number of the device executing the operation
 ///
+/// \param[in] device_id
+///     true if using hipBLASLt
+///
 DeviceBatchedGemm::DeviceBatchedGemm(TypeConstant compute_type,
                                      hipblasOperation_t op_a,
                                      hipblasOperation_t op_b,
@@ -47,14 +50,16 @@ DeviceBatchedGemm::DeviceBatchedGemm(TypeConstant compute_type,
                                      void const* alpha,
                                      void const* beta,
                                      double operations,
-                                     int device_id)
+                                     int device_id,
+                                     bool lt)
     : BatchedGemm(compute_type,
                   op_a, op_b,
                   a, b, c,
                   batch_count,
                   alpha, beta,
                   operations),
-      device_id_(device_id)
+      device_id_(device_id),
+      lt_(lt)
 {
     // Set device, create stream.
     HIP_CALL(hipSetDevice(device_id_));
@@ -64,12 +69,14 @@ DeviceBatchedGemm::DeviceBatchedGemm(TypeConstant compute_type,
     HIPBLAS_CALL(hipblasCreate(&hipblas_handle_));
     HIPBLAS_CALL(hipblasSetStream(hipblas_handle_, hip_stream_));
 
-    // Create hipBLASLt handle and matmul descriptor.
-    HIPBLASLT_CALL(hipblasLtCreate(&hipblaslt_handle_));
-    HIPBLASLT_CALL(hipblasLtMatmulDescCreate(
-        &hipblaslt_matmul_desc_,
-        compute_type.compute_,
-        c->type().hip_));
+    if (lt) {
+        // Create hipBLASLt handle and matmul descriptor.
+        HIPBLASLT_CALL(hipblasLtCreate(&hipblaslt_handle_));
+        HIPBLASLT_CALL(hipblasLtMatmulDescCreate(
+            &hipblaslt_matmul_desc_,
+            compute_type.compute_,
+            c->type().hip_));
+    }
 
     // Create hipRAND generator, assign stream.
     HIPRAND_CALL(hiprandCreateGenerator(&hiprand_generator_,
@@ -92,9 +99,11 @@ DeviceBatchedGemm::~DeviceBatchedGemm()
     (void)hipSetDevice(device_id_);
 
     // Destroy all the handles.
+    if (lt_) {
+        (void)hipblasLtMatmulDescDestroy(hipblaslt_matmul_desc_);
+        (void)hipblasLtDestroy(hipblaslt_handle_);
+    }
     (void)hiprandDestroyGenerator(hiprand_generator_);
-    (void)hipblasLtMatmulDescDestroy(hipblaslt_matmul_desc_);
-    (void)hipblasLtDestroy(hipblaslt_handle_);
     (void)hipblasDestroy(hipblas_handle_);
     (void)hipStreamDestroy(hip_stream_);
 

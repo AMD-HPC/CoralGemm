@@ -50,7 +50,8 @@ public:
                       void const* alpha,
                       void const* beta,
                       double operations,
-                      int device_id = 0);
+                      int device_id,
+                      bool lt);
     ~DeviceBatchedGemm();
 
     /// Populates the batch with random data.
@@ -88,6 +89,7 @@ private:
     void runBatchedGemmLt();
 
     int device_id_; ///< the number of the device executing the operation
+    bool lt_;       ///< true if using hipBLASLt
 
     hipStream_t hip_stream_;                      ///< stream
     hipblasHandle_t hipblas_handle_;              ///< hipBLAS handle

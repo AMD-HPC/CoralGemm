@@ -38,6 +38,9 @@
 /// \param[in] device_id
 ///     the number of the GPU executing the matrix multiplication
 ///
+/// \param[in] lt
+///     If true, indicates the use of hipBLASLt.
+///
 BatchedGemm*
 BatchedGemm::make(std::string type_a_name,
                   std::string type_b_name,
@@ -50,7 +53,8 @@ BatchedGemm::make(std::string type_a_name,
                   int batch_count,
                   void const* alpha,
                   void const* beta,
-                  int device_id)
+                  int device_id,
+                  bool lt)
 {
     hipblasOperation_t op_a = stringToOp(op_a_name);
     hipblasOperation_t op_b = stringToOp(op_b_name);
@@ -83,7 +87,8 @@ BatchedGemm::make(std::string type_a_name,
                                  batch_count,
                                  alpha, beta,
                                  operations(stringToType(type_c_name), m, n, k),
-                                 device_id);
+                                 device_id,
+                                 lt);
 }
 
 //------------------------------------------------------------------------------
@@ -92,6 +97,9 @@ BatchedGemm::make(std::string type_a_name,
 ///
 /// \remark
 ///     Not listing parameters common with BatchedGemm::make().
+///
+/// \param[in] lt
+///     If true, indicates the use of hipBLASLt.
 ///
 /// \param[in] host_a, host_b, host_c
 ///     If true, indicates that the array is stored in host memory.
@@ -117,6 +125,7 @@ BatchedGemm::makeDevices(std::string type_a_name,
                          int batch_count,
                          void const* alpha,
                          void const* beta,
+                         bool lt,
                          bool host_a,
                          bool host_b,
                          bool host_c,
@@ -179,6 +188,7 @@ BatchedGemm::makeDevices(std::string type_a_name,
                                   batch_count,
                                   alpha, beta,
                                   operations(stringToType(type_c_name), m, n, k),
-                                  device_id);
+                                  device_id,
+                                  lt);
     }
 }
