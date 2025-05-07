@@ -76,6 +76,8 @@ DeviceBatchedGemm::DeviceBatchedGemm(TypeConstant compute_type,
             &hipblaslt_matmul_desc_,
             compute_type.compute_,
             c->type().hip_));
+        hipblaslt_workspace_size_ = 128*1024*1024;
+        HIP_CALL(hipMalloc(&hipblaslt_workspace_, hipblaslt_workspace_size_));
     }
 
     // Create hipRAND generator, assign stream.
@@ -102,6 +104,7 @@ DeviceBatchedGemm::~DeviceBatchedGemm()
     if (lt_) {
         (void)hipblasLtMatmulDescDestroy(hipblaslt_matmul_desc_);
         (void)hipblasLtDestroy(hipblaslt_handle_);
+        (void)hipFree(hipblaslt_workspace_);
     }
     (void)hiprandDestroyGenerator(hiprand_generator_);
     (void)hipblasDestroy(hipblas_handle_);
@@ -377,7 +380,9 @@ void DeviceBatchedGemm::runGemmLt()
                                     b_->h_array(i), b_->layout(),
                             beta_,  c_->h_array(i), c_->layout(),
                                     c_->h_array(i), c_->layout(),
-                            nullptr, nullptr, 0, hip_stream_));
+                            nullptr,
+                            hipblaslt_workspace_, hipblaslt_workspace_size_,
+                            hip_stream_));
         HIP_CALL(hipEventRecord(stop[i]));
     }
 }
@@ -419,7 +424,9 @@ void DeviceBatchedGemm::runBatchedGemmLt()
                                 b_->data(), b_->layout(),
                         beta_,  c_->data(), c_->layout(),
                                 c_->data(), c_->layout(),
-                        nullptr, nullptr, 0, hip_stream_));
+                        nullptr,
+                        hipblaslt_workspace_, hipblaslt_workspace_size_,
+                        hip_stream_));
     HIP_CALL(hipEventRecord(stop[0]));
 }
 

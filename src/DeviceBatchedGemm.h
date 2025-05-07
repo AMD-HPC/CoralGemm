@@ -94,6 +94,8 @@ private:
     hipStream_t hip_stream_;                      ///< stream
     hipblasHandle_t hipblas_handle_;              ///< hipBLAS handle
     hipblasLtHandle_t hipblaslt_handle_;          ///< hipBLASLt handle
+    void* hipblaslt_workspace_;                   ///< hipBLASLt workspace
+    std::size_t hipblaslt_workspace_size_;        ///< hipBLASLt workspace size
     hipblasLtMatmulDesc_t hipblaslt_matmul_desc_; ///< hipBLASLt mm descriptor
     hiprandGenerator_t hiprand_generator_;        ///< random number generator
 
