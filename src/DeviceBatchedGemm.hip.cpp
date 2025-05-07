@@ -367,7 +367,7 @@ void DeviceBatchedGemm::runGemmLt()
                                         &op_a_, sizeof(op_a_)));
     HIPBLASLT_CALL(
         hipblasLtMatmulDescSetAttribute(hipblaslt_matmul_desc_,
-                                        HIPBLASLT_MATMUL_DESC_TRANSA,
+                                        HIPBLASLT_MATMUL_DESC_TRANSB,
                                         &op_b_, sizeof(op_b_)));
 
     // Call in a loop, record events.
@@ -402,7 +402,7 @@ void DeviceBatchedGemm::runBatchedGemmLt()
                                         &op_a_, sizeof(op_a_)));
     HIPBLASLT_CALL(
         hipblasLtMatmulDescSetAttribute(hipblaslt_matmul_desc_,
-                                        HIPBLASLT_MATMUL_DESC_TRANSA,
+                                        HIPBLASLT_MATMUL_DESC_TRANSB,
                                         &op_b_, sizeof(op_b_)));
 
     // Set the batch count.
