@@ -10,15 +10,17 @@
 #include "Exception.h"
 
 #include <complex>
+#include "FloatTypes.h"
 
-#if defined(USE_HIP)
-    #include <hipblas/hipblas.h>
-#elif defined(USE_CUDA)
-    #include <cublas_v2.h>
-#endif
 
 /// C++ wrappers for hipBLAS
 namespace hipblas {
+
+#if hipblasVersionMajor >= 3
+    using hipblasComplex = hipComplex;
+    using hipblasDoubleComplex = hipDoubleComplex;
+    using hipblasDatatype_t = hipDataType;
+#endif
 
 //------------------------------------------------------------------------------
 /// standard GEMM (float)
