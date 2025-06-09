@@ -12,20 +12,34 @@
     #include <hipblaslt/hipblaslt.h>
     #include <hip/hip_fp8.h>
 #elif defined(USE_CUDA)
+    #include <cublas_v2.h>
 #endif
 
 struct TypeConstant {
     hipDataType          hip_;
+#if hipblasVersionMajor >= 3
+    hipDataType          hipblas_;
+#else
     hipblasDatatype_t    hipblas_;
+#endif
     hipblasComputeType_t compute_;
 
     hipDataType          hip() { return hip_; }
-    hipblasDatatype_t    hipblas() { return hipblas_; }
+#if hipblasVersionMajor >= 3
+    hipDataType          hipblas() { return hipblas_; }
     hipblasComputeType_t compute() { return compute_; }
+#else
+    hipblasDatatype_t    hipblas() { return hipblas_; }
+    hipblasDatatype_t    compute() { return hipblas_; } // was only using hipblas_ before not compute()
+#endif
 };
 
 constexpr hipDataType HIP_INVALID = static_cast<hipDataType>(1023);
+#if hipblasVersionMajor >= 3
+constexpr hipDataType HIPBLAS_INVALID = static_cast<hipDataType>(1023);
+#else
 constexpr hipblasDatatype_t HIPBLAS_INVALID = static_cast<hipblasDatatype_t>(255);
+#endif
 constexpr hipblasComputeType_t COMPUTE_INVALID = static_cast<hipblasComputeType_t>(15);
 
 const TypeConstant R_64F = { HIP_R_64F,     HIPBLAS_R_64F,   HIPBLAS_COMPUTE_64F };

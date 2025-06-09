@@ -287,7 +287,7 @@ void DeviceBatchedGemm::runGemmEx()
                           alpha_, a_->h_array(i), a_->type().hipblas_, a_->ld(),
                                   b_->h_array(i), b_->type().hipblas_, b_->ld(),
                           beta_,  c_->h_array(i), c_->type().hipblas_, c_->ld(),
-                          compute_type_.hipblas_,
+                          compute_type_.compute(),
                           HIPBLAS_GEMM_DEFAULT));
         HIP_CALL(hipEventRecord(stop[i]));
     }
@@ -316,7 +316,7 @@ void DeviceBatchedGemm::runBatchedGemmEx()
             beta_,
             c_->d_array(), c_->type().hipblas_, c_->ld(),
             batch_count_,
-            compute_type_.hipblas_,
+            compute_type_.compute(),
             HIPBLAS_GEMM_DEFAULT));
     HIP_CALL(hipEventRecord(stop[0]));
 }
@@ -347,7 +347,7 @@ void DeviceBatchedGemm::runStridedBatchedGemmEx()
                     b_->data(), b_->type().hipblas_, b_->ld(), stride_b,
             beta_,  c_->data(), c_->type().hipblas_, c_->ld(), stride_c,
             batch_count_,
-            compute_type_.hipblas_,
+            compute_type_.compute(),
             HIPBLAS_GEMM_DEFAULT));
     HIP_CALL(hipEventRecord(stop[0]));
 }
