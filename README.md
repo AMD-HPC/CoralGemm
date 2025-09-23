@@ -40,40 +40,6 @@ To do so, set `USE_HIP=OFF`, `USE_CUDA=ON`, and set `CMAKE_CUDA_ARCHITECTURES`, 
 cmake -DUSE_HIP=OFF -DUSE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=90 ..
 ```
 
-## Common Cases
-
-### DGEMM
-
-* 16 GB devices (Radeon VII): `./gemm R_64F R_64F R_64F R_64F OP_N OP_T 8640 8640 8640 8640 8640 8640 9 300`
-* 32 GB devices (MI60, MI100): `./gemm R_64F R_64F R_64F R_64F OP_N OP_T 8640 8640 8640 8640 8640 8640 18 300`
-* 64 GB devices (MI200 series): `./gemm R_64F R_64F R_64F R_64F OP_N OP_T 8640 8640 8640 8640 8640 8640 36 300`
-
-### SGEMM
-
-* 16 GB devices (Radeon VII): `./gemm R_32F R_32F R_32F R_32F OP_N OP_T 8640 8640 8640 8640 8640 8640 18 300`
-* 32 GB devices (MI60, MI100): `./gemm R_32F R_32F R_32F R_32F OP_N OP_T 8640 8640 8640 8640 8640 8640 36 300`
-* 64 GB devices (MI200 series): `./gemm R_32F R_32F R_32F R_32F OP_N OP_T 8640 8640 8640 8640 8640 8640 72 300`
-
-### Mixed-Precision
-
-Support for FP16 and BF16 is provided by the Ex API of hipBLAS.\
-Use the `ex` command line option to use the Ex API.
-
-To run **half-precision (FP16)** GEMM with accumulation to FP32 on the MI200 series devices call, e.g.:\
-`./gemm R_16F R_16F R_32F R_32F OP_N OP_T 8640 8640 8640 8640 8640 8640 50 300 ex`
-
-To run **bfloat16 (BF16)** GEMM with accumulation to FP32 on the MI200 series devices call, e.g.:\
-`./gemm R_16B R_16B R_32F R_32F OP_N OP_T 8640 8640 8640 8640 8640 8640 50 300 ex`
-
-Support for FP8 types, E4M3 and E5M2, is provided by hipBLASLt.\
-Use the `lt` command line option to use hipBLASLt.
-
-To run **FP8 (E4M3)** GEMM with accumulation to FP32 on the MI300 series devices call, e.g.:\
-`./gemm R_8F R_8F R_32F R_32F OP_N OP_T 8640 8640 8640 8640 8640 8640 50 300 lt`
-
-To run **FP8 (E5M2)** GEMM with accumulation to FP32 on the MI300 series devices call, e.g.:\
-`./gemm R_8B R_8B R_32F R_32F OP_N OP_T 8640 8640 8640 8640 8640 8640 50 300 lt`
-
 ## Command-Line Details
 
 ```
@@ -149,6 +115,39 @@ The test uses `assert()` in device code and requires `-DCMAKE_BUILD_TYPE=DEBUG`.
 Entries of A, B, and C are set to 1, and so are the factors `alpha` and `beta`.\
 Then, after GEMM is ran, all entries of C are checked to contain k+1.\
 Note that performance is usually much higher when using integer initialization.
+
+## Examples
+
+### DGEMM/SGEMM
+
+```
+./gemm R_64F R_64F R_64F R_64F OP_N OP_T ...
+./gemm R_32F R_32F R_32F R_32F OP_N OP_T ...
+```
+
+### FP16/BF16
+
+```
+./gemm R_16B R_16B R_32F R_32F OP_N OP_T ... ex
+./gemm R_16F R_16F R_32F R_32F OP_N OP_T ... ex
+```
+
+### FP8 (E4M3/E5M2)
+
+```
+./gemm R_8B R_8B R_32F R_32F OP_N OP_T ... lt
+./gemm R_8F R_8F R_32F R_32F OP_N OP_T ... lt
+```
+
+## Tips
+
+* Aim for a dozen or so matrices in the batch to keep the median stable.
+* Beyond that, extra memory is usually better spent on larger matrices.
+* Grow the matrices and/or batch size until the GPU is effectively full.
+* Choose dimensions divisible by a small power of two, but avoid exact powers of two:
+  - Multiples of 64, 128, or 256 align well with tiling, wavefront sizes, and memory layout.
+  - Exact powers of two (e.g. 16 384, 32 768) can trigger unfavorable strides (cache/TLB conflict misses).
+  - Example: use 12 800 instead of 131 072; 25 600 instead of 262 144; 512 000 instead of 524 288.
 
 ## Help
 
