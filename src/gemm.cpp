@@ -92,12 +92,14 @@ void run(int argc, char** argv)
 
     float                alpha_r_32f;
     double               alpha_r_64f;
+    __half               alpha_r_16f;
     std::complex<float>  alpha_c_32f;
     std::complex<double> alpha_c_64f;
     int32_t              alpha_r_32i;
 
     float                beta_r_32f;
     double               beta_r_64f;
+    __half               beta_r_16f;
     std::complex<float>  beta_c_32f;
     std::complex<double> beta_c_64f;
     int32_t              beta_r_32i;
@@ -105,12 +107,14 @@ void run(int argc, char** argv)
     if (testing) {
         alpha_r_32f = 1.0;
         alpha_r_64f = 1.0;
+        alpha_r_16f = __float2half(1.0);
         alpha_c_32f = 1.0;
         alpha_c_64f = 1.0;
         alpha_r_32i = 1;
 
         beta_r_32f = 1.0;
         beta_r_64f = 1.0;
+        beta_r_16f = __float2half(1.0);
         beta_c_32f = 1.0;
         beta_c_64f = 1.0;
         beta_r_32i = 1;
@@ -118,6 +122,7 @@ void run(int argc, char** argv)
     else {
         alpha_r_32f = 2.71828;
         alpha_r_64f = 2.71828;
+        alpha_r_16f = __float2half(2.71828);
         alpha_c_32f = 2.71828;
         alpha_c_64f = 2.71828;
         alpha_r_32i = 2;
@@ -125,6 +130,7 @@ void run(int argc, char** argv)
         if (zero_beta) {
             beta_r_32f = 0.0;
             beta_r_64f = 0.0;
+            beta_r_16f = __float2half(0.0);
             beta_c_32f = 0.0;
             beta_c_64f = 0.0;
             beta_r_32i = 0;
@@ -132,6 +138,7 @@ void run(int argc, char** argv)
         else {
             beta_r_32f = 3.14159;
             beta_r_64f = 3.14159;
+            beta_r_16f = __float2half(3.14159);
             beta_c_32f = 3.14159;
             beta_c_64f = 3.14159;
             beta_r_32i = 3;
@@ -144,15 +151,19 @@ void run(int argc, char** argv)
     std::string compute_type(argv[4]);
     if      (compute_type == "R_32F") alpha = &alpha_r_32f;
     else if (compute_type == "R_64F") alpha = &alpha_r_64f;
+    else if (compute_type == "R_16F") alpha = &alpha_r_16f;
     else if (compute_type == "C_32F") alpha = &alpha_c_32f;
     else if (compute_type == "C_64F") alpha = &alpha_c_64f;
     else if (compute_type == "R_32I") alpha = &alpha_r_32i;
+    else ERROR("Unsupported compute type");
 
     if      (compute_type == "R_32F") beta = &beta_r_32f;
     else if (compute_type == "R_64F") beta = &beta_r_64f;
+    else if (compute_type == "R_16F") beta = &beta_r_16f;
     else if (compute_type == "C_32F") beta = &beta_c_32f;
     else if (compute_type == "C_64F") beta = &beta_c_64f;
     else if (compute_type == "R_32I") beta = &beta_r_32i;
+    else ERROR("Unsupported compute type");
 
     std::vector<BatchedGemm*> dev_gemms;
     BatchedGemm::makeDevices(std::string(argv[1]), // type a
