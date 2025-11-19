@@ -454,7 +454,9 @@ std::pair<double, double> DeviceBatchedGemm::getGflops(Mode mode)
 
     double gflops;
     double time_in_sec;
-    if (mode == Mode::Standard || mode == Mode::StandardEx) {
+    if (mode == Mode::Standard ||
+        mode == Mode::StandardEx ||
+        mode == Mode::StandardLt) {
         // Report GFLOPS based on the median time.
         std::vector<float> elapsed(batch_count_);
         HIP_CALL(hipEventSynchronize(stop[batch_count_-1]));
