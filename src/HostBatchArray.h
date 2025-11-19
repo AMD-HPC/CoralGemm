@@ -73,6 +73,6 @@ inline
 HostBatchArray<T>::~HostBatchArray()
 {
     (void)hipFree(this->d_array_);
-    (void)hipFree(this->h_array_);
-    (void)hipFree(this->data_);
+    (void)hipHostFree(this->h_array_);
+    (void)hipHostFree(this->data_);
 }
