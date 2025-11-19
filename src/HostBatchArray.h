@@ -65,6 +65,9 @@ HostBatchArray<T>::HostBatchArray(TypeConstant type,
     HIP_CALL(hipMemcpy(this->d_array_, this->h_array_, sizeof(T*)*batch_count,
                        hipMemcpyHostToDevice));
 
+    HIPBLASLT_CALL(hipblasLtMatrixLayoutCreate(&this->layout_,
+                                               type.hip(),
+                                               m, n, ld));
 }
 
 //------------------------------------------------------------------------------
@@ -72,6 +75,7 @@ template <typename T>
 inline
 HostBatchArray<T>::~HostBatchArray()
 {
+    (void)hipblasLtMatrixLayoutDestroy(this->layout_);
     (void)hipFree(this->d_array_);
     (void)hipHostFree(this->h_array_);
     (void)hipHostFree(this->data_);
