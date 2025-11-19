@@ -77,6 +77,6 @@ DeviceBatchArray<T>::~DeviceBatchArray()
     (void)hipSetDevice(device_id_);
     (void)hipblasLtMatrixLayoutDestroy(this->layout_);
     (void)hipFree(this->d_array_);
-    (void)hipFree(this->h_array_);
+    (void)hipHostFree(this->h_array_);
     (void)hipFree(this->data_);
 }
