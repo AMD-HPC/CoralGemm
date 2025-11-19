@@ -245,8 +245,10 @@ void DeviceBatchedGemm::runStridedBatchedGemm()
            "Missing \"ex\" or \"lt\" in the command line?");
 
     // Compute strides (= sizes of matrices).
-    size_t stride_a = size_t(a_->ld())*(HIPBLAS_OP_N ? a_->n() : a_->m());
-    size_t stride_b = size_t(b_->ld())*(HIPBLAS_OP_N ? b_->n() : b_->m());
+    size_t stride_a = size_t(a_->ld())*
+                      (op_a_ == HIPBLAS_OP_N ? a_->n() : a_->m());
+    size_t stride_b = size_t(b_->ld())*
+                      (op_b_ == HIPBLAS_OP_N ? b_->n() : b_->m());
     size_t stride_c = size_t(c_->ld())*c_->n();
 
     // Call once, record start and stop.
@@ -329,8 +331,10 @@ void DeviceBatchedGemm::runBatchedGemmEx()
 void DeviceBatchedGemm::runStridedBatchedGemmEx()
 {
     // Compute strides (= sizes of matrices).
-    size_t stride_a = size_t(a_->ld())*(HIPBLAS_OP_N ? a_->n() : a_->m());
-    size_t stride_b = size_t(b_->ld())*(HIPBLAS_OP_N ? b_->n() : b_->m());
+    size_t stride_a = size_t(a_->ld())*
+                      (op_a_ == HIPBLAS_OP_N ? a_->n() : a_->m());
+    size_t stride_b = size_t(b_->ld())*
+                      (op_b_ == HIPBLAS_OP_N ? b_->n() : b_->m());
     size_t stride_c = size_t(c_->ld())*c_->n();
 
     // Call once, record start and stop.
