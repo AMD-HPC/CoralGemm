@@ -85,7 +85,7 @@ DeviceBatchedGemm::DeviceBatchedGemm(TypeConstant compute_type,
                                         HIPRAND_RNG_PSEUDO_DEFAULT));
     HIPRAND_CALL(hiprandSetStream(hiprand_generator_, hip_stream_));
 
-    // Create evvents.
+    // Create events.
     start.resize(batch_count);
     stop.resize(batch_count);
     for (int i = 0; i < batch_count; ++i) {
