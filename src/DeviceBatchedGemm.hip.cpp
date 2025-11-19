@@ -37,7 +37,7 @@
 /// \param[in] device_id
 ///     the number of the device executing the operation
 ///
-/// \param[in] device_id
+/// \param[in] lt
 ///     true if using hipBLASLt
 ///
 DeviceBatchedGemm::DeviceBatchedGemm(TypeConstant compute_type,
