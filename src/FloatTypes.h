@@ -24,13 +24,13 @@ struct TypeConstant {
 #endif
     hipblasComputeType_t compute_;
 
-    hipDataType          hip() { return hip_; }
+    hipDataType          hip() const { return hip_; }
 #if hipblasVersionMajor >= 3
-    hipDataType          hipblas() { return hipblas_; }
-    hipblasComputeType_t compute() { return compute_; }
+    hipDataType          hipblas() const { return hipblas_; }
+    hipblasComputeType_t compute() const { return compute_; }
 #else
-    hipblasDatatype_t    hipblas() { return hipblas_; }
-    hipblasDatatype_t    compute() { return hipblas_; } // was only using hipblas_ before not compute()
+    hipblasDatatype_t    hipblas() const { return hipblas_; }
+    hipblasDatatype_t    compute() const { return hipblas_; } // was only using hipblas_ before not compute()
 #endif
 };
 
