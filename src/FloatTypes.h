@@ -30,7 +30,8 @@ struct TypeConstant {
     hipblasComputeType_t compute() const { return compute_; }
 #else
     hipblasDatatype_t    hipblas() const { return hipblas_; }
-    hipblasDatatype_t    compute() const { return hipblas_; } // was only using hipblas_ before not compute()
+    // Pre-v3 compatibility: no separate compute type, return hipblas_
+    hipblasDatatype_t    compute() const { return hipblas_; }
 #endif
 };
 

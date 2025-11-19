@@ -17,8 +17,11 @@
 namespace hipblas {
 
 #if hipblasVersionMajor >= 3
-    // TODO for next major release (hipblasVersionMajor 4) consider search and replace all hipblasComplex/hipblasDoubleComplex with hipComplex types
-    // For now keeping backard compatibility for hipblasVersionMajor 2 which had V2 APIs
+    // TODO for next major release (hipblasVersionMajor 4) consider
+    // search and replace all hipblasComplex/hipblasDoubleComplex
+    // with hipComplex types.
+    // For now keeping backward compatibility for hipblasVersionMajor 2
+    // which had V2 APIs.
     using hipblasComplex = hipComplex;
     using hipblasDoubleComplex = hipDoubleComplex;
     using hipblasDatatype_t = hipDataType;

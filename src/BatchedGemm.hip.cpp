@@ -187,7 +187,8 @@ BatchedGemm::makeDevices(std::string type_a_name,
                                   a, b, c,
                                   batch_count,
                                   alpha, beta,
-                                  operations(stringToType(type_c_name), m, n, k),
+                                  operations(stringToType(type_c_name),
+                                             m, n, k),
                                   device_id,
                                   lt);
     }
