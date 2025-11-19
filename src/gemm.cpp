@@ -282,6 +282,11 @@ void run(int argc, char** argv)
     }
     // Loop until time_span reached.
     while (timestamp/1e6 <= time_span || count < 2);
+
+    // Cleanup: delete all BatchedGemm objects.
+    for (auto* gemm : dev_gemms) {
+        delete gemm;
+    }
 }
 
 //------------------------------------------------------------------------------
