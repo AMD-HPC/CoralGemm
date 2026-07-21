@@ -44,13 +44,33 @@ BaseBatchArray::make(TypeConstant type,
                      int device_id,
                      bool coherent)
 {
+    // Resolve FP8 type to the format supported by this device.
+    // gfx941 (MI300A) and gfx942 (MI300X/MI325X) use FNUZ.
+    // gfx950 (MI350) and future architectures use OCP.
+    // Unknown architectures default to OCP (the forward-looking standard).
+    if (type.hip_ == HIP_R_8F_E4M3 || type.hip_ == HIP_R_8F_E5M2) {
+        if (device_id >= 0) {
+            hipDeviceProp_t prop;
+            hipGetDeviceProperties(&prop, device_id);
+            std::string arch(prop.gcnArchName);
+            bool fnuz = (arch.substr(0, 6) == "gfx942" ||
+                         arch.substr(0, 6) == "gfx941");
+            if (fnuz) {
+                if (type.hip_ == HIP_R_8F_E4M3) type.hip_ = HIP_R_8F_E4M3_FNUZ;
+                if (type.hip_ == HIP_R_8F_E5M2) type.hip_ = HIP_R_8F_E5M2_FNUZ;
+            }
+        }
+    }
+
     if (device_id < 0) {
         // Return HostBatchArray
         switch (type.hip_) {
             case HIP_R_8F_E4M3:
+            case HIP_R_8F_E4M3_FNUZ:
                 return new HostBatchArray<fp8>(
                     type, m, n, ld, batch_count, coherent);
             case HIP_R_8F_E5M2:
+            case HIP_R_8F_E5M2_FNUZ:
                 return new HostBatchArray<bf8>(
                     type, m, n, ld, batch_count, coherent);
             case HIP_R_16F:
@@ -85,9 +105,11 @@ BaseBatchArray::make(TypeConstant type,
         // Return DeviceBatchArray
         switch (type.hip_) {
             case HIP_R_8F_E4M3:
+            case HIP_R_8F_E4M3_FNUZ:
                 return new DeviceBatchArray<fp8>(
                     type, m, n, ld, batch_count, device_id);
             case HIP_R_8F_E5M2:
+            case HIP_R_8F_E5M2_FNUZ:
                 return new DeviceBatchArray<bf8>(
                     type, m, n, ld, batch_count, device_id);
             case HIP_R_16F:
