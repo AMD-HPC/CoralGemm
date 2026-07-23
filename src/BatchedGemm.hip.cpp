@@ -7,6 +7,48 @@
 ///
 #include "DeviceBatchedGemm.h"
 
+#include <string>
+
+//------------------------------------------------------------------------------
+/// \brief
+///     Resolves an FP8 data type to the format supported by the execution
+///     device. Returns the type unchanged for all non-FP8 types.
+///
+/// \param[in] type
+///     the requested data type
+///
+/// \param[in] exec_device_id
+///     the GPU that will execute the GEMM (not the storage location)
+///
+/// \remark
+///     gfx941 (MI300A) and gfx942 (MI300X/MI325X) use FNUZ.
+///     gfx950 (MI350) and future architectures use OCP.
+///     Unknown architectures default to OCP (the forward-looking standard).
+///     Resolving against the execution device rather than the storage
+///     location ensures host-resident operands (device_id = -1) still get
+///     the correct FP8 format for the GPU that consumes them.
+///
+static TypeConstant
+resolveFp8Type(TypeConstant type, int exec_device_id)
+{
+    if (type.hip_ != HIP_R_8F_E4M3 && type.hip_ != HIP_R_8F_E5M2)
+        return type;
+
+    ASSERT(exec_device_id >= 0, "FP8 type resolution requires a valid "
+                                "execution device id");
+    //leveraging execution id, rather than storage id
+    hipDeviceProp_t prop;
+    HIP_CALL(hipGetDeviceProperties(&prop, exec_device_id));
+    std::string arch(prop.gcnArchName);
+    bool fnuz = (arch.substr(0, 6) == "gfx942" ||
+                 arch.substr(0, 6) == "gfx941");
+    if (fnuz) {
+        if (type.hip_ == HIP_R_8F_E4M3) type.hip_ = HIP_R_8F_E4M3_FNUZ;
+        if (type.hip_ == HIP_R_8F_E5M2) type.hip_ = HIP_R_8F_E5M2_FNUZ;
+    }
+    return type;
+}
+
 //------------------------------------------------------------------------------
 /// \brief
 ///     Creates a single BatchedGemm object.
@@ -59,26 +101,29 @@ BatchedGemm::make(std::string type_a_name,
     hipblasOperation_t op_a = stringToOp(op_a_name);
     hipblasOperation_t op_b = stringToOp(op_b_name);
 
-    BaseBatchArray* a = BaseBatchArray::make(stringToType(type_a_name),
-                                             op_a == HIPBLAS_OP_N ? m : k,
-                                             op_a == HIPBLAS_OP_N ? k : m,
-                                             lda,
-                                             batch_count,
-                                             device_id);
+    BaseBatchArray* a = BaseBatchArray::make(
+                            resolveFp8Type(stringToType(type_a_name), device_id),
+                            op_a == HIPBLAS_OP_N ? m : k,
+                            op_a == HIPBLAS_OP_N ? k : m,
+                            lda,
+                            batch_count,
+                            device_id);
 
-    BaseBatchArray* b = BaseBatchArray::make(stringToType(type_b_name),
-                                             op_b == HIPBLAS_OP_N ? k : n,
-                                             op_b == HIPBLAS_OP_N ? n : k,
-                                             ldb,
-                                             batch_count,
-                                             device_id);
+    BaseBatchArray* b = BaseBatchArray::make(
+                            resolveFp8Type(stringToType(type_b_name), device_id),
+                            op_b == HIPBLAS_OP_N ? k : n,
+                            op_b == HIPBLAS_OP_N ? n : k,
+                            ldb,
+                            batch_count,
+                            device_id);
 
-    BaseBatchArray* c = BaseBatchArray::make(stringToType(type_c_name),
-                                             m,
-                                             n,
-                                             ldc,
-                                             batch_count,
-                                             device_id);
+    BaseBatchArray* c = BaseBatchArray::make(
+                            resolveFp8Type(stringToType(type_c_name), device_id),
+                            m,
+                            n,
+                            ldc,
+                            batch_count,
+                            device_id);
 
     return new DeviceBatchedGemm(stringToType(compute_type_name),
                                  stringToOp(op_a_name),
@@ -153,32 +198,36 @@ BatchedGemm::makeDevices(std::string type_a_name,
             enablePeerAccess(device_id, 0);
 
         if (device_id == 0 || shared_a == false) {
-            a = BaseBatchArray::make(stringToType(type_a_name),
-                                     op_a == HIPBLAS_OP_N ? m : k,
-                                     op_a == HIPBLAS_OP_N ? k : m,
-                                     lda,
-                                     batch_count,
-                                     host_a ? -1 : device_id,
-                                     coherent_a);
+            a = BaseBatchArray::make(
+                    resolveFp8Type(stringToType(type_a_name), device_id),
+                    op_a == HIPBLAS_OP_N ? m : k,
+                    op_a == HIPBLAS_OP_N ? k : m,
+                    lda,
+                    batch_count,
+                    host_a ? -1 : device_id,
+                    coherent_a);
         }
 
         if (device_id == 0 || shared_b == false) {
-            b = BaseBatchArray::make(stringToType(type_b_name),
-                                     op_b == HIPBLAS_OP_N ? k : n,
-                                     op_b == HIPBLAS_OP_N ? n : k,
-                                     ldb,
-                                     batch_count,
-                                     host_b ? -1 : device_id,
-                                     coherent_b);
+            b = BaseBatchArray::make(
+                    resolveFp8Type(stringToType(type_b_name), device_id),
+                    op_b == HIPBLAS_OP_N ? k : n,
+                    op_b == HIPBLAS_OP_N ? n : k,
+                    ldb,
+                    batch_count,
+                    host_b ? -1 : device_id,
+                    coherent_b);
         }
 
-        BaseBatchArray* c = BaseBatchArray::make(stringToType(type_c_name),
-                                                 m,
-                                                 n,
-                                                 ldc,
-                                                 batch_count,
-                                                 host_c ? -1 : device_id,
-                                                 coherent_c);
+        BaseBatchArray* c = BaseBatchArray::make(
+                                resolveFp8Type(stringToType(type_c_name),
+                                               device_id),
+                                m,
+                                n,
+                                ldc,
+                                batch_count,
+                                host_c ? -1 : device_id,
+                                coherent_c);
 
         dev_gemms[device_id] =
             new DeviceBatchedGemm(stringToType(compute_type_name),
