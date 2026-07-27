@@ -21,8 +21,8 @@
 ///     the GPU that will execute the GEMM (not the storage location)
 ///
 /// \remark
-///     gfx941 (MI300A) and gfx942 (MI300X/MI325X) use FNUZ.
-///     gfx950 (MI350) and future architectures use OCP.
+///     gfx942 (MI300A/MI300X/MI325X) use FNUZ.
+///     OCP is the default encoding for all other architectures.
 ///     Unknown architectures default to OCP (the forward-looking standard).
 ///     Resolving against the execution device rather than the storage
 ///     location ensures host-resident operands (device_id = -1) still get
@@ -36,12 +36,10 @@ resolveFp8Type(TypeConstant type, int exec_device_id)
 
     ASSERT(exec_device_id >= 0, "FP8 type resolution requires a valid "
                                 "execution device id");
-    //leveraging execution id, rather than storage id
-    hipDeviceProp_t prop;
+    hipDeviceProp_t prop{};
     HIP_CALL(hipGetDeviceProperties(&prop, exec_device_id));
     std::string arch(prop.gcnArchName);
-    bool fnuz = (arch.substr(0, 6) == "gfx942" ||
-                 arch.substr(0, 6) == "gfx941");
+    bool fnuz = (arch.substr(0, 6) == "gfx942");
     if (fnuz) {
         if (type.hip_ == HIP_R_8F_E4M3) type.hip_ = HIP_R_8F_E4M3_FNUZ;
         if (type.hip_ == HIP_R_8F_E5M2) type.hip_ = HIP_R_8F_E5M2_FNUZ;
