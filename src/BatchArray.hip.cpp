@@ -16,14 +16,20 @@
 template <typename T>
 __global__
 void generateConstKernel(
-    int m, int n, T** d_array, int lda, double val)
+    int m, int n, T** d_array, int lda, double val, bool is_fnuz)
 {
     T value;
     if constexpr (std::is_same<T, fp8>::value) {
-        value = fp8(internal::cast_to_f8<double, true>(val, /*wm*/3, /*we*/4));
+        if (is_fnuz)
+            value = fp8(internal::cast_to_f8<double, true >(val, /*wm*/3, /*we*/4));
+        else
+            value = fp8(internal::cast_to_f8<double, false>(val, /*wm*/3, /*we*/4));
     }
     else if constexpr (std::is_same<T, bf8>::value) {
-        value = bf8(internal::cast_to_f8<double, true>(val, /*wm*/2, /*we*/5));
+        if (is_fnuz)
+            value = bf8(internal::cast_to_f8<double, true >(val, /*wm*/2, /*we*/5));
+        else
+            value = bf8(internal::cast_to_f8<double, false>(val, /*wm*/2, /*we*/5));
     }
     else {
         value = T(val);
@@ -44,7 +50,7 @@ void generateConstKernel(
 template <typename T>
 __global__
 void validateConstKernel(
-    int m, int n, T** d_array, int lda, double val)
+    int m, int n, T** d_array, int lda, double val, bool is_fnuz)
 {
     T* A = d_array[blockIdx.y];
     int i = blockIdx.x*blockDim.x + threadIdx.x;
@@ -52,12 +58,20 @@ void validateConstKernel(
         if (i < m) {
             double value;
             if constexpr (std::is_same<T, fp8>::value) {
-                value = internal::cast_from_f8<double, true>(
-                    static_cast<__hip_fp8_storage_t>(A[j]), /*wm*/3, /*we*/4);
+                if (is_fnuz)
+                    value = internal::cast_from_f8<double, true >(
+                        static_cast<__hip_fp8_storage_t>(A[j]), /*wm*/3, /*we*/4);
+                else
+                    value = internal::cast_from_f8<double, false>(
+                        static_cast<__hip_fp8_storage_t>(A[j]), /*wm*/3, /*we*/4);
             }
             else if constexpr (std::is_same<T, bf8>::value) {
-                value = internal::cast_from_f8<double, true>(
-                    static_cast<__hip_fp8_storage_t>(A[j]), /*wm*/2, /*we*/5);
+                if (is_fnuz)
+                    value = internal::cast_from_f8<double, true >(
+                        static_cast<__hip_fp8_storage_t>(A[j]), /*wm*/2, /*we*/5);
+                else
+                    value = internal::cast_from_f8<double, false>(
+                        static_cast<__hip_fp8_storage_t>(A[j]), /*wm*/2, /*we*/5);
             }
             else if constexpr (std::is_same<T, std::complex<float>>::value ||
                                std::is_same<T, std::complex<double>>::value) {
@@ -79,12 +93,13 @@ template <typename T>
 void BatchArray<T>::generateConstant(int device_id, double val)
 {
     HIP_CALL(hipSetDevice(device_id));
+    bool is_fnuz = isFnuz(type_.hip_);
     int group_size = 256;
     int groups_per_matrix =
         m_%group_size == 0 ? m_/group_size : m_/group_size+1;
     dim3 grid_size(groups_per_matrix, batch_count_);
     generateConstKernel<<<grid_size, group_size>>>(
-        m_, n_, d_array_, ld_, val);
+        m_, n_, d_array_, ld_, val, is_fnuz);
 }
 
 template
@@ -126,12 +141,13 @@ template <typename T>
 void BatchArray<T>::validateConstant(int device_id, double val)
 {
     HIP_CALL(hipSetDevice(device_id));
+    bool is_fnuz = isFnuz(type_.hip_);
     int group_size = 256;
     int groups_per_matrix =
         m_%group_size == 0 ? m_/group_size : m_/group_size+1;
     dim3 grid_size(groups_per_matrix, batch_count_);
     validateConstKernel<<<grid_size, group_size>>>(
-        m_, n_, d_array_, ld_, val);
+        m_, n_, d_array_, ld_, val, is_fnuz);
 }
 
 template

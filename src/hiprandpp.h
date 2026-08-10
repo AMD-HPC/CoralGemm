@@ -27,33 +27,33 @@ namespace hiprand {
 //------------------------------------------------------------------------------
 template <typename T>
 __global__
-void int2float_kernel(std::size_t len, unsigned int* src, T* dst);
+void int2float_kernel(std::size_t len, unsigned int* src, T* dst, bool is_fnuz);
 
 template <typename T>
-void int2float(std::size_t len, unsigned int* src, T* dst);
+void int2float(std::size_t len, unsigned int* src, T* dst, bool is_fnuz = false);
 
 //------------------------------------------------------------------------------
 /// Generate uniform (FP8).
 inline
 void generateUniform(
-    hiprandGenerator_t generator, fp8* A, std::size_t len)
+    hiprandGenerator_t generator, fp8* A, std::size_t len, bool is_fnuz)
 {
     unsigned int* uint32_A;
     HIP_CALL(hipMalloc(&uint32_A, sizeof(unsigned int)*len));
     HIPRAND_CALL(hiprandGenerate(generator, uint32_A, len));
-    int2float(len, uint32_A, A);
+    int2float(len, uint32_A, A, is_fnuz);
     HIP_CALL(hipFree(uint32_A));
 }
 
 /// Generate uniform (BF8).
 inline
 void generateUniform(
-    hiprandGenerator_t generator, bf8* A, std::size_t len)
+    hiprandGenerator_t generator, bf8* A, std::size_t len, bool is_fnuz)
 {
     unsigned int* uint32_A;
     HIP_CALL(hipMalloc(&uint32_A, sizeof(unsigned int)*len));
     HIPRAND_CALL(hiprandGenerate(generator, uint32_A, len));
-    int2float(len, uint32_A, A);
+    int2float(len, uint32_A, A, is_fnuz);
     HIP_CALL(hipFree(uint32_A));
 }
 
