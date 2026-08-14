@@ -12,7 +12,7 @@
 
 //------------------------------------------------------------------------------
 /// \brief
-///     Represents an array of matrices in device memory
+///     Represents an array of matrices in host memory.
 ///     Inherits from the BatchArray class.
 ///
 template <typename T>
@@ -52,8 +52,9 @@ HostBatchArray<T>::HostBatchArray(TypeConstant type,
 {
 #if defined(USE_HIP)
     HIP_CALL(hipHostMalloc(&this->data_, sizeof(T)*ld*n*batch_count,
-                           coherent ? hipHostMallocCoherent
-                                    : hipHostMallocNonCoherent));
+                           hipHostMallocPortable |
+                           (coherent ? hipHostMallocCoherent
+                                     : hipHostMallocNonCoherent)));
 #else
     HIP_CALL(hipHostMalloc(&this->data_, sizeof(T)*ld*n*batch_count));
 #endif
@@ -61,9 +62,16 @@ HostBatchArray<T>::HostBatchArray(TypeConstant type,
     for (int i = 0; i < batch_count; ++i)
         this->h_array_[i] = this->data_+(std::size_t)ld*n*i;
 
-    HIP_CALL(hipMalloc(&this->d_array_, sizeof(T*)*batch_count));
-    HIP_CALL(hipMemcpy(this->d_array_, this->h_array_, sizeof(T*)*batch_count,
-                       hipMemcpyHostToDevice));
+    // Allocate the array of pointers in portable pinned host memory,
+    // addressable from any device executing the GEMM.
+#if defined(USE_HIP)
+    HIP_CALL(hipHostMalloc(&this->d_array_, sizeof(T*)*batch_count,
+                           hipHostMallocPortable));
+#else
+    HIP_CALL(hipHostMalloc(&this->d_array_, sizeof(T*)*batch_count));
+#endif
+    for (int i = 0; i < batch_count; ++i)
+        this->d_array_[i] = this->h_array_[i];
 
     HIPBLASLT_CALL(hipblasLtMatrixLayoutCreate(&this->layout_,
                                                type.hip(),
@@ -76,7 +84,7 @@ inline
 HostBatchArray<T>::~HostBatchArray()
 {
     (void)hipblasLtMatrixLayoutDestroy(this->layout_);
-    (void)hipFree(this->d_array_);
+    (void)hipHostFree(this->d_array_);
     (void)hipHostFree(this->h_array_);
     (void)hipHostFree(this->data_);
 }
