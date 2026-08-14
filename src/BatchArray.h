@@ -85,7 +85,15 @@ public:
     void generateUniform(int device_id, hiprandGenerator_t generator) override
     {
         HIP_CALL(hipSetDevice(device_id));
-        hiprand::generateUniform(generator, data_, ld_*n_*batch_count_);
+        if constexpr (std::is_same<T, fp8>::value ||
+                      std::is_same<T, bf8>::value) {
+            bool is_fnuz = isFnuz(type_.hip_);
+            hiprand::generateUniform(generator, data_, ld_*n_*batch_count_,
+                                     is_fnuz);
+        }
+        else {
+            hiprand::generateUniform(generator, data_, ld_*n_*batch_count_);
+        }
     }
 
     /// Populates the batch with a specific value.

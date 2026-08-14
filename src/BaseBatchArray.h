@@ -23,6 +23,17 @@
 
 //------------------------------------------------------------------------------
 /// \brief
+///     Returns true if the given HIP data type uses the FNUZ FP8 encoding.
+///     Used by launchers to derive the correct encoding from the resolved type
+///     without duplicating the GPU architecture check.
+///
+inline bool isFnuz(hipDataType t)
+{
+    return t == HIP_R_8F_E4M3_FNUZ || t == HIP_R_8F_E5M2_FNUZ;
+}
+
+//------------------------------------------------------------------------------
+/// \brief
 ///     Base class for representing arrays in host memory or device memory.
 ///     Serves as the parent class for the templated class BatchArray.
 ///

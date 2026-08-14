@@ -44,13 +44,17 @@ BaseBatchArray::make(TypeConstant type,
                      int device_id,
                      bool coherent)
 {
+    // FP8 types are resolved to the device-specific format (FNUZ vs OCP)
+    // by the caller against the execution device, not the storage location.
     if (device_id < 0) {
         // Return HostBatchArray
         switch (type.hip_) {
             case HIP_R_8F_E4M3:
+            case HIP_R_8F_E4M3_FNUZ:
                 return new HostBatchArray<fp8>(
                     type, m, n, ld, batch_count, coherent);
             case HIP_R_8F_E5M2:
+            case HIP_R_8F_E5M2_FNUZ:
                 return new HostBatchArray<bf8>(
                     type, m, n, ld, batch_count, coherent);
             case HIP_R_16F:
@@ -85,9 +89,11 @@ BaseBatchArray::make(TypeConstant type,
         // Return DeviceBatchArray
         switch (type.hip_) {
             case HIP_R_8F_E4M3:
+            case HIP_R_8F_E4M3_FNUZ:
                 return new DeviceBatchArray<fp8>(
                     type, m, n, ld, batch_count, device_id);
             case HIP_R_8F_E5M2:
+            case HIP_R_8F_E5M2_FNUZ:
                 return new DeviceBatchArray<bf8>(
                     type, m, n, ld, batch_count, device_id);
             case HIP_R_16F:
