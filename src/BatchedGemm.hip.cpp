@@ -100,7 +100,8 @@ BatchedGemm::make(std::string type_a_name,
     hipblasOperation_t op_b = stringToOp(op_b_name);
 
     BaseBatchArray* a = BaseBatchArray::make(
-                            resolveFp8Type(stringToType(type_a_name), device_id),
+                            resolveFp8Type(stringToType(type_a_name),
+                                           device_id),
                             op_a == HIPBLAS_OP_N ? m : k,
                             op_a == HIPBLAS_OP_N ? k : m,
                             lda,
@@ -108,7 +109,8 @@ BatchedGemm::make(std::string type_a_name,
                             device_id);
 
     BaseBatchArray* b = BaseBatchArray::make(
-                            resolveFp8Type(stringToType(type_b_name), device_id),
+                            resolveFp8Type(stringToType(type_b_name),
+                                           device_id),
                             op_b == HIPBLAS_OP_N ? k : n,
                             op_b == HIPBLAS_OP_N ? n : k,
                             ldb,
@@ -116,7 +118,8 @@ BatchedGemm::make(std::string type_a_name,
                             device_id);
 
     BaseBatchArray* c = BaseBatchArray::make(
-                            resolveFp8Type(stringToType(type_c_name), device_id),
+                            resolveFp8Type(stringToType(type_c_name),
+                                           device_id),
                             m,
                             n,
                             ldc,

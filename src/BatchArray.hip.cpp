@@ -21,15 +21,19 @@ void generateConstKernel(
     T value;
     if constexpr (std::is_same<T, fp8>::value) {
         if (is_fnuz)
-            value = fp8(internal::cast_to_f8<double, true >(val, /*wm*/3, /*we*/4));
+            value = fp8(internal::cast_to_f8<double, true >(
+                val, /*wm*/3, /*we*/4));
         else
-            value = fp8(internal::cast_to_f8<double, false>(val, /*wm*/3, /*we*/4));
+            value = fp8(internal::cast_to_f8<double, false>(
+                val, /*wm*/3, /*we*/4));
     }
     else if constexpr (std::is_same<T, bf8>::value) {
         if (is_fnuz)
-            value = bf8(internal::cast_to_f8<double, true >(val, /*wm*/2, /*we*/5));
+            value = bf8(internal::cast_to_f8<double, true >(
+                val, /*wm*/2, /*we*/5));
         else
-            value = bf8(internal::cast_to_f8<double, false>(val, /*wm*/2, /*we*/5));
+            value = bf8(internal::cast_to_f8<double, false>(
+                val, /*wm*/2, /*we*/5));
     }
     else {
         value = T(val);
@@ -60,18 +64,22 @@ void validateConstKernel(
             if constexpr (std::is_same<T, fp8>::value) {
                 if (is_fnuz)
                     value = internal::cast_from_f8<double, true >(
-                        static_cast<__hip_fp8_storage_t>(A[j]), /*wm*/3, /*we*/4);
+                        static_cast<__hip_fp8_storage_t>(A[j]),
+                        /*wm*/3, /*we*/4);
                 else
                     value = internal::cast_from_f8<double, false>(
-                        static_cast<__hip_fp8_storage_t>(A[j]), /*wm*/3, /*we*/4);
+                        static_cast<__hip_fp8_storage_t>(A[j]),
+                        /*wm*/3, /*we*/4);
             }
             else if constexpr (std::is_same<T, bf8>::value) {
                 if (is_fnuz)
                     value = internal::cast_from_f8<double, true >(
-                        static_cast<__hip_fp8_storage_t>(A[j]), /*wm*/2, /*we*/5);
+                        static_cast<__hip_fp8_storage_t>(A[j]),
+                        /*wm*/2, /*we*/5);
                 else
                     value = internal::cast_from_f8<double, false>(
-                        static_cast<__hip_fp8_storage_t>(A[j]), /*wm*/2, /*we*/5);
+                        static_cast<__hip_fp8_storage_t>(A[j]),
+                        /*wm*/2, /*we*/5);
             }
             else if constexpr (std::is_same<T, std::complex<float>>::value ||
                                std::is_same<T, std::complex<double>>::value) {

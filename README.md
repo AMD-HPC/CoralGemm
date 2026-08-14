@@ -138,8 +138,14 @@ Note that performance is usually much higher when using integer initialization.
 ./gemm R_8B R_8B R_32F R_32F OP_N OP_T ... lt
 ./gemm R_8F R_8F R_32F R_32F OP_N OP_T ... lt
 ```
+
 ## FP8 encoding standard handling
-CoralGemm treats R_8F and R_8B as architecture-portable FP8 types. On gfx942 devices—MI300A, MI300X, and MI325X—they resolve to the FNUZ encoding. On other architectures they use the OCP encoding by default. Unsupported datatype and architecture combinations are reported by hipBLASLt. 
+
+CoralGemm treats R_8F and R_8B as architecture-portable FP8 types.
+On gfx942 devices—MI300A, MI300X, and MI325X—they resolve to the FNUZ encoding.
+On other architectures they use the OCP encoding by default.
+Unsupported datatype and architecture combinations are reported by hipBLASLt.
+
 ## Tips
 
 * Aim for a dozen or so matrices in the batch to keep the median stable.

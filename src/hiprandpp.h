@@ -27,10 +27,12 @@ namespace hiprand {
 //------------------------------------------------------------------------------
 template <typename T>
 __global__
-void int2float_kernel(std::size_t len, unsigned int* src, T* dst, bool is_fnuz);
+void int2float_kernel(
+    std::size_t len, unsigned int* src, T* dst, bool is_fnuz);
 
 template <typename T>
-void int2float(std::size_t len, unsigned int* src, T* dst, bool is_fnuz = false);
+void int2float(
+    std::size_t len, unsigned int* src, T* dst, bool is_fnuz = false);
 
 //------------------------------------------------------------------------------
 /// Generate uniform (FP8).

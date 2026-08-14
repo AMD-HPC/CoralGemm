@@ -53,7 +53,7 @@ void int2float(std::size_t len, unsigned int* src, T* dst, bool is_fnuz)
     constexpr int block_size = 256;
     int num_blocks = len%block_size == 0 ? len/block_size : len/block_size + 1;
     int2float_kernel<T><<<dim3(num_blocks), dim3(block_size)>>>(len, src, dst,
-                                                                 is_fnuz);
+                                                                is_fnuz);
 }
 
 template
