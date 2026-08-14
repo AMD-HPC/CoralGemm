@@ -72,6 +72,10 @@ public:
             case HIP_R_32F:
             case HIP_R_16F:
             case HIP_R_16BF:
+            case HIP_R_8F_E4M3:
+            case HIP_R_8F_E5M2:
+            case HIP_R_8F_E4M3_FNUZ:
+            case HIP_R_8F_E5M2_FNUZ:
             case HIP_R_32I:
             case HIP_R_8I:
                 return 2.0*m*n*k;

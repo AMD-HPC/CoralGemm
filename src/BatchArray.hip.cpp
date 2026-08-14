@@ -11,6 +11,70 @@
 
 //------------------------------------------------------------------------------
 /// \brief
+///     Converts a double to the type of the array,
+///     applying the FP8 encoding of the execution device.
+///
+template <typename T>
+__device__
+T toType(double val, bool is_fnuz)
+{
+    if constexpr (std::is_same<T, fp8>::value) {
+        if (is_fnuz)
+            return fp8(internal::cast_to_f8<double, true >(
+                val, /*wm*/3, /*we*/4));
+        else
+            return fp8(internal::cast_to_f8<double, false>(
+                val, /*wm*/3, /*we*/4));
+    }
+    else if constexpr (std::is_same<T, bf8>::value) {
+        if (is_fnuz)
+            return bf8(internal::cast_to_f8<double, true >(
+                val, /*wm*/2, /*we*/5));
+        else
+            return bf8(internal::cast_to_f8<double, false>(
+                val, /*wm*/2, /*we*/5));
+    }
+    else {
+        return T(val);
+    }
+}
+
+//------------------------------------------------------------------------------
+/// \brief
+///     Converts a value of the type of the array to a double,
+///     applying the FP8 encoding of the execution device.
+///
+template <typename T>
+__device__
+double toDouble(T const& element, bool is_fnuz)
+{
+    if constexpr (std::is_same<T, fp8>::value) {
+        if (is_fnuz)
+            return internal::cast_from_f8<double, true >(
+                static_cast<__hip_fp8_storage_t>(element), /*wm*/3, /*we*/4);
+        else
+            return internal::cast_from_f8<double, false>(
+                static_cast<__hip_fp8_storage_t>(element), /*wm*/3, /*we*/4);
+    }
+    else if constexpr (std::is_same<T, bf8>::value) {
+        if (is_fnuz)
+            return internal::cast_from_f8<double, true >(
+                static_cast<__hip_fp8_storage_t>(element), /*wm*/2, /*we*/5);
+        else
+            return internal::cast_from_f8<double, false>(
+                static_cast<__hip_fp8_storage_t>(element), /*wm*/2, /*we*/5);
+    }
+    else if constexpr (std::is_same<T, std::complex<float>>::value ||
+                       std::is_same<T, std::complex<double>>::value) {
+        return std::real(element);
+    }
+    else {
+        return static_cast<double>(element);
+    }
+}
+
+//------------------------------------------------------------------------------
+/// \brief
 ///     Populates the batch with a specific value.
 ///
 template <typename T>
@@ -18,27 +82,7 @@ __global__
 void generateConstKernel(
     int m, int n, T** d_array, int lda, double val, bool is_fnuz)
 {
-    T value;
-    if constexpr (std::is_same<T, fp8>::value) {
-        if (is_fnuz)
-            value = fp8(internal::cast_to_f8<double, true >(
-                val, /*wm*/3, /*we*/4));
-        else
-            value = fp8(internal::cast_to_f8<double, false>(
-                val, /*wm*/3, /*we*/4));
-    }
-    else if constexpr (std::is_same<T, bf8>::value) {
-        if (is_fnuz)
-            value = bf8(internal::cast_to_f8<double, true >(
-                val, /*wm*/2, /*we*/5));
-        else
-            value = bf8(internal::cast_to_f8<double, false>(
-                val, /*wm*/2, /*we*/5));
-    }
-    else {
-        value = T(val);
-    }
-
+    T value = toType<T>(val, is_fnuz);
     T* A = d_array[blockIdx.y];
     int i = blockIdx.x*blockDim.x + threadIdx.x;
     for (int j = 0; j < n; ++j) {
@@ -50,46 +94,21 @@ void generateConstKernel(
 //------------------------------------------------------------------------------
 /// \brief
 ///     Checks if the batch contains a specific value.
+///     Compares against the value rounded to the type of the array,
+///     which is not the exact value for low precision types.
 ///
 template <typename T>
 __global__
 void validateConstKernel(
     int m, int n, T** d_array, int lda, double val, bool is_fnuz)
 {
+    double expected = toDouble<T>(toType<T>(val, is_fnuz), is_fnuz);
     T* A = d_array[blockIdx.y];
     int i = blockIdx.x*blockDim.x + threadIdx.x;
     for (int j = 0; j < n; ++j) {
         if (i < m) {
-            T const& element = A[std::size_t(lda)*j + i];
-            double value;
-            if constexpr (std::is_same<T, fp8>::value) {
-                if (is_fnuz)
-                    value = internal::cast_from_f8<double, true >(
-                        static_cast<__hip_fp8_storage_t>(element),
-                        /*wm*/3, /*we*/4);
-                else
-                    value = internal::cast_from_f8<double, false>(
-                        static_cast<__hip_fp8_storage_t>(element),
-                        /*wm*/3, /*we*/4);
-            }
-            else if constexpr (std::is_same<T, bf8>::value) {
-                if (is_fnuz)
-                    value = internal::cast_from_f8<double, true >(
-                        static_cast<__hip_fp8_storage_t>(element),
-                        /*wm*/2, /*we*/5);
-                else
-                    value = internal::cast_from_f8<double, false>(
-                        static_cast<__hip_fp8_storage_t>(element),
-                        /*wm*/2, /*we*/5);
-            }
-            else if constexpr (std::is_same<T, std::complex<float>>::value ||
-                               std::is_same<T, std::complex<double>>::value) {
-                value = std::real(element);
-            }
-            else {
-                value = static_cast<double>(element);
-            }
-            assert(value == val);
+            double value = toDouble<T>(A[std::size_t(lda)*j + i], is_fnuz);
+            assert(value == expected);
         }
     }
 }

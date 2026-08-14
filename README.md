@@ -94,6 +94,7 @@ When `TIME_SPAN` is set to 0, one warmup run is done, followed by one timing run
 `R_8F` and `R_8B` are architecture-portable FP8 types.
 On gfx942 devices—MI300A, MI300X, and MI325X—they resolve to the FNUZ encoding.
 On other architectures they use the OCP encoding by default.
+Both require hipBLASLt (`lt`), whether used for the inputs or for the output.
 Unsupported datatype and architecture combinations are reported by hipBLASLt.
 
 ### Supported Ops:
@@ -119,6 +120,9 @@ If `testing` is set, a primitive sanity test is ran.\
 The test uses `assert()` in device code and requires `-DCMAKE_BUILD_TYPE=DEBUG`.\
 Entries of A, B, and C are set to 1, and so are the factors `alpha` and `beta`.\
 Then, after GEMM is ran, all entries of C are checked to contain k+1.\
+The check is against k+1 rounded to the type of C, so k+1 has to be within the
+range of that type—240 for `R_8F` in the FNUZ encoding, 448 for `R_8F` in the
+OCP encoding, and 57344 for `R_8B` in either.\
 Note that performance is usually much higher when using integer initialization.
 
 ## Examples
@@ -142,6 +146,7 @@ Note that performance is usually much higher when using integer initialization.
 ```
 ./gemm R_8B R_8B R_32F R_32F OP_N OP_T ... lt
 ./gemm R_8F R_8F R_32F R_32F OP_N OP_T ... lt
+./gemm R_8F R_8F R_8F  R_32F OP_N OP_T ... lt
 ```
 
 ## Tips

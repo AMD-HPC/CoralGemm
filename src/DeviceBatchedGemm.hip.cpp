@@ -78,11 +78,12 @@ DeviceBatchedGemm::DeviceBatchedGemm(TypeConstant compute_type,
 
     if (lt) {
         // Create hipBLASLt handle and matmul descriptor.
+        // The scale type is the type of alpha and beta, i.e., the compute type.
         HIPBLASLT_CALL(hipblasLtCreate(&hipblaslt_handle_));
         HIPBLASLT_CALL(hipblasLtMatmulDescCreate(
             &hipblaslt_matmul_desc_,
             compute_type.compute_,
-            c->type().hip_));
+            compute_type.hip_));
         hipblaslt_workspace_size_ = 128*1024*1024;
         HIP_CALL(hipMalloc(&hipblaslt_workspace_, hipblaslt_workspace_size_));
     }
