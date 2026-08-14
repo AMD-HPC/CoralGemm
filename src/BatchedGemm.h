@@ -143,6 +143,10 @@ public:
     ///     number of floating point operations
     ///     for one member of the batch (single matrix multiply)
     ///
+    /// \param[in] own_a, own_b
+    ///     If false, the corresponding array is shared with other devices
+    ///     and deleted by its owner, not by this object.
+    ///
     BatchedGemm(TypeConstant compute_type,
                 hipblasOperation_t op_a,
                 hipblasOperation_t op_b,
@@ -152,17 +156,22 @@ public:
                 int batch_count,
                 void const* alpha,
                 void const* beta,
-                double operations)
+                double operations,
+                bool own_a = true,
+                bool own_b = true)
         : compute_type_(compute_type),
           op_a_(op_a), op_b_(op_b),
           a_(a), b_(b), c_(c),
+          own_a_(own_a), own_b_(own_b),
           batch_count_(batch_count),
           alpha_(alpha), beta_(beta),
           operations_(operations) {}
     virtual ~BatchedGemm()
     {
-        delete a_;
-        delete b_;
+        if (own_a_)
+            delete a_;
+        if (own_b_)
+            delete b_;
         delete c_;
     }
 
@@ -221,6 +230,8 @@ protected:
     BaseBatchArray* a_;         ///< the input matrices A
     BaseBatchArray* b_;         ///< the input matrices B
     BaseBatchArray* c_;         ///< the output matrices C
+    bool own_a_;                ///< true if this object deletes A
+    bool own_b_;                ///< true if this object deletes B
     int batch_count_;           ///< the number of matrices in the batch
     void const* alpha_;         ///< the alpha factor in matrix multiply
     void const* beta_;          ///< the alpha factor in matrix multiply

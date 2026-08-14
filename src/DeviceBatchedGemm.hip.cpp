@@ -40,6 +40,10 @@
 /// \param[in] lt
 ///     true if using hipBLASLt
 ///
+/// \param[in] own_a, own_b
+///     If false, the corresponding array is shared with other devices
+///     and deleted by its owner, not by this object.
+///
 DeviceBatchedGemm::DeviceBatchedGemm(TypeConstant compute_type,
                                      hipblasOperation_t op_a,
                                      hipblasOperation_t op_b,
@@ -51,13 +55,16 @@ DeviceBatchedGemm::DeviceBatchedGemm(TypeConstant compute_type,
                                      void const* beta,
                                      double operations,
                                      int device_id,
-                                     bool lt)
+                                     bool lt,
+                                     bool own_a,
+                                     bool own_b)
     : BatchedGemm(compute_type,
                   op_a, op_b,
                   a, b, c,
                   batch_count,
                   alpha, beta,
-                  operations),
+                  operations,
+                  own_a, own_b),
       device_id_(device_id),
       lt_(lt)
 {

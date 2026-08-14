@@ -198,7 +198,11 @@ BatchedGemm::makeDevices(std::string type_a_name,
         if (device_id > 0 && (shared_a || shared_b))
             enablePeerAccess(device_id, 0);
 
-        if (device_id == 0 || shared_a == false) {
+        // A shared array is allocated by device 0 and deleted by device 0.
+        bool own_a = device_id == 0 || shared_a == false;
+        bool own_b = device_id == 0 || shared_b == false;
+
+        if (own_a) {
             a = BaseBatchArray::make(
                     resolveFp8Type(stringToType(type_a_name), device_id),
                     op_a == HIPBLAS_OP_N ? m : k,
@@ -209,7 +213,7 @@ BatchedGemm::makeDevices(std::string type_a_name,
                     coherent_a);
         }
 
-        if (device_id == 0 || shared_b == false) {
+        if (own_b) {
             b = BaseBatchArray::make(
                     resolveFp8Type(stringToType(type_b_name), device_id),
                     op_b == HIPBLAS_OP_N ? k : n,
@@ -240,6 +244,7 @@ BatchedGemm::makeDevices(std::string type_a_name,
                                   operations(stringToType(type_c_name),
                                              m, n, k),
                                   device_id,
-                                  lt);
+                                  lt,
+                                  own_a, own_b);
     }
 }

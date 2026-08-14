@@ -51,7 +51,9 @@ public:
                       void const* beta,
                       double operations,
                       int device_id,
-                      bool lt);
+                      bool lt,
+                      bool own_a = true,
+                      bool own_b = true);
     ~DeviceBatchedGemm();
 
     /// Populates the batch with random data.
