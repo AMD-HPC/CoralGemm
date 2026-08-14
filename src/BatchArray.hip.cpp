@@ -60,33 +60,34 @@ void validateConstKernel(
     int i = blockIdx.x*blockDim.x + threadIdx.x;
     for (int j = 0; j < n; ++j) {
         if (i < m) {
+            T const& element = A[std::size_t(lda)*j + i];
             double value;
             if constexpr (std::is_same<T, fp8>::value) {
                 if (is_fnuz)
                     value = internal::cast_from_f8<double, true >(
-                        static_cast<__hip_fp8_storage_t>(A[j]),
+                        static_cast<__hip_fp8_storage_t>(element),
                         /*wm*/3, /*we*/4);
                 else
                     value = internal::cast_from_f8<double, false>(
-                        static_cast<__hip_fp8_storage_t>(A[j]),
+                        static_cast<__hip_fp8_storage_t>(element),
                         /*wm*/3, /*we*/4);
             }
             else if constexpr (std::is_same<T, bf8>::value) {
                 if (is_fnuz)
                     value = internal::cast_from_f8<double, true >(
-                        static_cast<__hip_fp8_storage_t>(A[j]),
+                        static_cast<__hip_fp8_storage_t>(element),
                         /*wm*/2, /*we*/5);
                 else
                     value = internal::cast_from_f8<double, false>(
-                        static_cast<__hip_fp8_storage_t>(A[j]),
+                        static_cast<__hip_fp8_storage_t>(element),
                         /*wm*/2, /*we*/5);
             }
             else if constexpr (std::is_same<T, std::complex<float>>::value ||
                                std::is_same<T, std::complex<double>>::value) {
-                value = std::real(A[j]);
+                value = std::real(element);
             }
             else {
-                value = static_cast<double>(A[j]);
+                value = static_cast<double>(element);
             }
             assert(value == val);
         }
